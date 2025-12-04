@@ -7,7 +7,7 @@
 	"plugins": [
 		{
 			"name": "databasin",
-			"source": "../plugins/databasin",
+			"source": "./databasin",
 			"description": "Provides a variety of tools to interact with Databasin platform, including querying datasets, managing data pipelines, and accessing metadata.",
 			"version": "0.0.1",
 			"author": {
