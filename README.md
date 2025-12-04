@@ -6,6 +6,10 @@ A collection of Claude Code plugins and integrations for extending AI agent capa
 
 This repository contains production-ready Claude Code plugins that enable AI agents to interact with external systems, APIs, and services. Each plugin provides specialized agents, slash commands, and skills for seamless integration into your AI-powered workflows.
 
+### Install Claude Code Marketplace
+
+`/plugin marketplace add databasin-ai/agent-plugins`
+
 ## Available Plugins
 
 ### Databasin Plugin
