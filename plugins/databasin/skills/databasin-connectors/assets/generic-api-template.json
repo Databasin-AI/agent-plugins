@@ -1,0 +1,44 @@
+{
+	"_comment": "Generic API Connector Template - Choose the appropriate authentication method",
+	"_noAuth": {
+		"connectorName": "Public API",
+		"connectorType": "File & API",
+		"connectorHost": "https://api.example.com/v1",
+		"connectorAuthType": 22,
+		"institutionID": 0,
+		"internalID": "",
+		"ownerID": 0
+	},
+	"_apiKey": {
+		"connectorName": "API with API Key",
+		"connectorType": "File & API",
+		"connectorHost": "https://api.example.com/v1",
+		"connectorPassword": "your_api_key_here",
+		"connectorAuthType": 8,
+		"connectorAdditionalDetails": "headerName=X-API-Key",
+		"institutionID": 0,
+		"internalID": "",
+		"ownerID": 0
+	},
+	"_bearerToken": {
+		"connectorName": "API with Bearer Token",
+		"connectorType": "File & API",
+		"connectorHost": "https://api.example.com/v1",
+		"connectorPassword": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+		"connectorAuthType": 20,
+		"institutionID": 0,
+		"internalID": "",
+		"ownerID": 0
+	},
+	"_basicAuth": {
+		"connectorName": "API with Basic Auth",
+		"connectorType": "File & API",
+		"connectorHost": "https://api.example.com/v1",
+		"connectorUsername": "your_username",
+		"connectorPassword": "your_password",
+		"connectorAuthType": 2,
+		"institutionID": 0,
+		"internalID": "",
+		"ownerID": 0
+	}
+}

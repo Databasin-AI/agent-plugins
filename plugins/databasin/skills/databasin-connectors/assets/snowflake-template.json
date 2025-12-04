@@ -1,0 +1,15 @@
+{
+	"_comment": "Snowflake Connector Template - Replace placeholder values with your Snowflake configuration",
+	"connectorName": "Snowflake Production",
+	"connectorType": "RDBMS",
+	"connectorHost": "your-account.snowflakecomputing.com",
+	"connectorDatabaseName": "YOUR_DATABASE",
+	"warehouse": "YOUR_WAREHOUSE",
+	"connectorUsername": "YOUR_USERNAME",
+	"connectorPassword": "your_password",
+	"connectorAuthType": 2,
+	"connectorAdditionalDetails": "schema=PUBLIC&role=YOUR_ROLE",
+	"institutionID": 0,
+	"internalID": "",
+	"ownerID": 0
+}

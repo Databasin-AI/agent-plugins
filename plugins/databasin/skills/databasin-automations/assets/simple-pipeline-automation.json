@@ -1,0 +1,29 @@
+{
+	"_comment": "Simple Pipeline Automation Template - Daily pipeline execution on schedule",
+	"_description": "This template demonstrates a basic automation that runs a single pipeline task daily at 2 AM",
+
+	"automationName": "Daily Pipeline Execution",
+	"internalID": "proj-001",
+	"isActive": 0,
+	"isPrivate": 0,
+	"auditEnabled": 0,
+
+	"jobDetails": {
+		"jobRunSchedule": "0 2 * * *",
+		"jobRunTimeZone": "America/New_York",
+		"jobClusterSize": "s",
+		"jobTimeout": "3600",
+		"tags": ["daily", "pipeline"],
+		"emailNotifications": ["user@example.com"]
+	},
+
+	"automationTask": [
+		{
+			"taskType": "pipeline",
+			"taskName": "Run Data Pipeline",
+			"jobID": "pipeline-123",
+			"automationOrderNumber": 1,
+			"isActive": true
+		}
+	]
+}

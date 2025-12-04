@@ -1,0 +1,34 @@
+{
+	"_comment": "SQL Query Automation Template - Execute SQL queries on schedule",
+	"_description": "This template demonstrates running multiple SQL queries hourly against a database connection",
+
+	"automationName": "Hourly SQL Analytics",
+	"internalID": "proj-001",
+	"isActive": 0,
+	"isPrivate": 0,
+	"auditEnabled": 0,
+
+	"jobDetails": {
+		"jobRunSchedule": "0 * * * *",
+		"jobRunTimeZone": "America/New_York",
+		"jobClusterSize": "s",
+		"jobTimeout": "1800",
+		"tags": ["hourly", "sql", "analytics"],
+		"emailNotifications": ["data-team@example.com"]
+	},
+
+	"automationTask": [
+		{
+			"taskType": "sql",
+			"taskName": "Refresh Sales Metrics",
+			"sqlTargetConnectionID": 58,
+			"sqlQueryMap": [
+				"DELETE FROM analytics.sales_hourly WHERE report_hour = DATE_TRUNC('hour', CURRENT_TIMESTAMP)",
+				"INSERT INTO analytics.sales_hourly SELECT DATE_TRUNC('hour', order_date) as report_hour, SUM(amount) as total_sales FROM sales.orders WHERE order_date >= CURRENT_TIMESTAMP - INTERVAL '1 hour' GROUP BY report_hour",
+				"UPDATE analytics.sales_hourly SET updated_at = CURRENT_TIMESTAMP WHERE report_hour = DATE_TRUNC('hour', CURRENT_TIMESTAMP)"
+			],
+			"automationOrderNumber": 1,
+			"isActive": true
+		}
+	]
+}

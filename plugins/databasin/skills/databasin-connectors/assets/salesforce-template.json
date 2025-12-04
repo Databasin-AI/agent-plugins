@@ -1,0 +1,29 @@
+{
+	"_comment": "Salesforce Connector Template - Replace placeholder values with your Salesforce credentials",
+	"_production": {
+		"connectorName": "Salesforce Production",
+		"connectorType": "CRM & ERP",
+		"connectorHost": "https://login.salesforce.com",
+		"connectorUsername": "your.email@company.com",
+		"connectorPassword": "your_password",
+		"securityToken": "YOUR_SECURITY_TOKEN",
+		"connectorAuthType": 2,
+		"connectorAdditionalDetails": "v=62.0",
+		"institutionID": 0,
+		"internalID": "",
+		"ownerID": 0
+	},
+	"_sandbox": {
+		"connectorName": "Salesforce Sandbox",
+		"connectorType": "CRM & ERP",
+		"connectorHost": "https://test.salesforce.com",
+		"connectorUsername": "your.email@company.com.sandbox",
+		"connectorPassword": "your_password",
+		"securityToken": "YOUR_SECURITY_TOKEN",
+		"connectorAuthType": 2,
+		"connectorAdditionalDetails": "v=62.0",
+		"institutionID": 0,
+		"internalID": "",
+		"ownerID": 0
+	}
+}

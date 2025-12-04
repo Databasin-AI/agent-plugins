@@ -1,0 +1,22 @@
+{
+	"institutionID": 0,
+	"internalID": "",
+	"ownerID": 0,
+	"pipelineName": "",
+	"isPrivate": 0,
+	"connectorTechnology": [],
+	"targetCatalogName": "",
+	"targetSchemaName": "",
+	"ingestionPattern": "data warehouse",
+	"createCatalogs": false,
+	"sourceNamingConvention": true,
+	"jobDetails": {
+		"tags": [],
+		"jobClusterSize": "M",
+		"emailNotifications": [],
+		"jobRunSchedule": "0 10 * * *",
+		"jobRunTimeZone": "UTC",
+		"jobTimeout": "43200"
+	},
+	"items": []
+}

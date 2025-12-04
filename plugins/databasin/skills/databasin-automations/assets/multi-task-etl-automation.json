@@ -1,0 +1,56 @@
+{
+	"_comment": "Multi-Task ETL Automation Template - Complex workflow with multiple task types",
+	"_description": "This template demonstrates a complete ETL workflow with pipeline extraction, SQL validation, and notebook reporting in sequence",
+
+	"automationName": "Daily ETL Workflow",
+	"internalID": "proj-001",
+	"isActive": 0,
+	"isPrivate": 0,
+	"auditEnabled": 1,
+
+	"auditInformation": {
+		"purpose": "Daily data synchronization and validation",
+		"owner": "Data Engineering Team",
+		"irbNumber": "IRB-2024-001"
+	},
+
+	"jobDetails": {
+		"jobRunSchedule": "0 2 * * *",
+		"jobRunTimeZone": "America/New_York",
+		"jobClusterSize": "m",
+		"jobTimeout": "10800",
+		"tags": ["etl", "daily", "production"],
+		"emailNotifications": ["data-engineering@example.com", "oncall@example.com"]
+	},
+
+	"automationTask": [
+		{
+			"taskType": "pipeline",
+			"taskName": "Extract Source Data",
+			"jobID": "pipeline-123",
+			"automationOrderNumber": 1,
+			"isActive": true
+		},
+		{
+			"taskType": "sql",
+			"taskName": "Validate and Transform Data",
+			"sqlTargetConnectionID": 58,
+			"sqlQueryMap": [
+				"UPDATE staging.customer_data SET validation_status = 'pending' WHERE load_date = CURRENT_DATE",
+				"UPDATE staging.customer_data SET validation_status = 'valid' WHERE email LIKE '%@%' AND phone IS NOT NULL AND load_date = CURRENT_DATE",
+				"UPDATE staging.customer_data SET validation_status = 'invalid' WHERE validation_status = 'pending' AND load_date = CURRENT_DATE",
+				"INSERT INTO production.customers SELECT customer_id, name, email, phone, CURRENT_TIMESTAMP as updated_at FROM staging.customer_data WHERE validation_status = 'valid' AND load_date = CURRENT_DATE ON CONFLICT (customer_id) DO UPDATE SET name = EXCLUDED.name, email = EXCLUDED.email, phone = EXCLUDED.phone, updated_at = EXCLUDED.updated_at",
+				"DELETE FROM staging.customer_data WHERE validation_status = 'invalid' AND load_date < CURRENT_DATE - 7"
+			],
+			"automationOrderNumber": 2,
+			"isActive": true
+		},
+		{
+			"taskType": "notebook",
+			"taskName": "Generate Data Quality Report",
+			"notebookPath": "/etl/quality/daily_validation_report",
+			"automationOrderNumber": 3,
+			"isActive": true
+		}
+	]
+}

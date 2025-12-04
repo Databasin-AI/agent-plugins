@@ -1,0 +1,29 @@
+{
+	"name": "databasin",
+	"version": "1.0.0",
+	"description": "Databasin API integration plugin providing authenticated API access, JWT management, and specialized agents for working with Databasin projects, pipelines, connectors, and reports.",
+	"author": {
+		"name": "Databasin Team"
+	},
+	"homepage": "https://databasin.ai",
+	"license": "CC-BY-4.0",
+	"keywords": [
+		"databasin",
+		"api",
+		"jwt",
+		"authentication",
+		"data-integration",
+		"pipelines",
+		"connectors",
+		"trino",
+		"reporting"
+	],
+	"agents": ["./agents/databasin-api-expert.md"],
+	"commands": [
+		"./commands/list-projects.md",
+		"./commands/list-connectors.md",
+		"./commands/get-user-info.md",
+		"./commands/refresh-token.md",
+		"./commands/api-health.md"
+	]
+}

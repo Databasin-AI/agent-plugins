@@ -1,0 +1,81 @@
+{
+	"_comment": "Docker Container Automation Template - Run Docker container job",
+	"_description": "This template demonstrates running a Docker container with environment variables and resource limits",
+
+	"automationName": "Docker ML Model Training",
+	"internalID": "proj-001",
+	"isActive": 0,
+	"isPrivate": 0,
+	"auditEnabled": 1,
+
+	"auditInformation": {
+		"purpose": "Machine learning model training and deployment",
+		"owner": "ML Engineering Team"
+	},
+
+	"jobDetails": {
+		"jobRunSchedule": "0 3 * * 1",
+		"jobRunTimeZone": "America/New_York",
+		"jobClusterSize": "l",
+		"jobTimeout": "14400",
+		"tags": ["docker", "ml", "weekly", "training"],
+		"emailNotifications": ["ml-team@example.com", "data-science@example.com"]
+	},
+
+	"automationTask": [
+		{
+			"taskType": "docker",
+			"taskName": "Train ML Model",
+			"dockerImage": "company-registry.azurecr.io/ml-training:latest",
+			"dockerCommand": "python train_model.py --config /config/model_config.yaml --output /models/latest",
+			"dockerEnvironmentVariables": {
+				"MODEL_TYPE": "xgboost",
+				"TRAINING_DATA_PATH": "/data/training/latest",
+				"VALIDATION_SPLIT": "0.2",
+				"MAX_ITERATIONS": "1000",
+				"LEARNING_RATE": "0.01"
+			},
+			"dockerResourceLimits": {
+				"cpu": "4",
+				"memory": "16Gi",
+				"gpu": "1"
+			},
+			"dockerVolumeMounts": [
+				{
+					"hostPath": "/mnt/data/training",
+					"containerPath": "/data/training",
+					"readOnly": true
+				},
+				{
+					"hostPath": "/mnt/models",
+					"containerPath": "/models",
+					"readOnly": false
+				},
+				{
+					"hostPath": "/mnt/config",
+					"containerPath": "/config",
+					"readOnly": true
+				}
+			],
+			"automationOrderNumber": 1,
+			"isActive": true
+		},
+		{
+			"taskType": "sql",
+			"taskName": "Log Model Metrics",
+			"sqlTargetConnectionID": 58,
+			"sqlQueryMap": [
+				"INSERT INTO ml.model_training_log (model_name, training_date, accuracy, precision, recall, f1_score) VALUES ('customer_churn_model', CURRENT_DATE, 0.92, 0.89, 0.94, 0.91)"
+			],
+			"automationOrderNumber": 2,
+			"isActive": true
+		},
+		{
+			"taskType": "notebook",
+			"taskName": "Generate Model Report",
+			"notebookPath": "/ml/reporting/model_performance_report",
+			"automationOrderNumber": 3,
+			"isActive": true
+		}
+	]
+}

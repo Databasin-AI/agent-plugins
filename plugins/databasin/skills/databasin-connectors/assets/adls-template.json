@@ -1,0 +1,41 @@
+{
+	"_comment": "Azure Data Lake Storage Gen2 Connector Template - Choose one authentication method and remove the others",
+	"_authMethod1_accessKey": {
+		"connectorName": "ADLS with Access Key",
+		"connectorType": "File & API",
+		"connectorStorageAccountName": "your_storage_account_name",
+		"connectorContainerName": "your_container_name",
+		"fileFolderName": "/path/to/data/",
+		"connectorPassword": "your_azure_access_key_base64==",
+		"connectorAuthType": 3,
+		"institutionID": 0,
+		"internalID": "",
+		"ownerID": 0
+	},
+	"_authMethod2_sasToken": {
+		"connectorName": "ADLS with SAS Token",
+		"connectorType": "File & API",
+		"connectorStorageAccountName": "your_storage_account_name",
+		"connectorContainerName": "your_container_name",
+		"fileFolderName": "/path/to/data/",
+		"connectorPassword": "?sv=2021-06-08&ss=bfqt&srt=sco&sp=rwdlacupiytfx...",
+		"connectorAuthType": 4,
+		"institutionID": 0,
+		"internalID": "",
+		"ownerID": 0
+	},
+	"_authMethod3_servicePrincipal": {
+		"connectorName": "ADLS with Service Principal",
+		"connectorType": "File & API",
+		"connectorStorageAccountName": "your_storage_account_name",
+		"connectorContainerName": "your_container_name",
+		"fileFolderName": "/path/to/data/",
+		"connectorUsername": "app-client-id-guid",
+		"connectorPassword": "client-secret-value",
+		"connectorAuthType": 5,
+		"connectorAdditionalDetails": "tenant-id-guid",
+		"institutionID": 0,
+		"internalID": "",
+		"ownerID": 0
+	}
+}

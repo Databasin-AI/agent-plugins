@@ -1,0 +1,63 @@
+{
+	"_comment": "File Drop Automation Template - Triggered by file arrival",
+	"_description": "This template demonstrates a trigger-based automation that processes files when they arrive in S3/ADLS",
+
+	"automationName": "File Upload Processing",
+	"internalID": "proj-001",
+	"isActive": 0,
+	"isPrivate": 0,
+	"auditEnabled": 1,
+
+	"auditInformation": {
+		"purpose": "Process incoming data files automatically",
+		"owner": "Data Operations Team"
+	},
+
+	"jobDetails": {
+		"jobRunSchedule": "",
+		"jobRunTimeZone": "America/New_York",
+		"jobClusterSize": "s",
+		"jobTimeout": "3600",
+		"tags": ["file-drop", "event-triggered", "processing"],
+		"emailNotifications": ["data-ops@example.com"]
+	},
+
+	"triggerConfiguration": {
+		"triggerType": "file_arrival",
+		"monitorPath": "s3://my-bucket/incoming/data/",
+		"filePattern": "*.csv",
+		"triggerOnChange": true
+	},
+
+	"automationTask": [
+		{
+			"taskType": "file",
+			"taskName": "Move File to Processing",
+			"sourceFileId": "connector-s3-incoming",
+			"targetFileId": "connector-s3-processing",
+			"sourcePath": "/incoming/data/",
+			"targetPath": "/processing/data/",
+			"fileOperation": "move",
+			"automationOrderNumber": 1,
+			"isActive": true
+		},
+		{
+			"taskType": "pipeline",
+			"taskName": "Process Data File",
+			"jobID": "pipeline-456",
+			"automationOrderNumber": 2,
+			"isActive": true
+		},
+		{
+			"taskType": "file",
+			"taskName": "Archive Processed File",
+			"sourceFileId": "connector-s3-processing",
+			"targetFileId": "connector-s3-archive",
+			"sourcePath": "/processing/data/",
+			"targetPath": "/archive/data/",
+			"fileOperation": "copy",
+			"automationOrderNumber": 3,
+			"isActive": true
+		}
+	]
+}

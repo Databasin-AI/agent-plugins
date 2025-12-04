@@ -1,0 +1,14 @@
+{
+	"_comment": "SFTP Connector Template - Replace placeholder values with your SFTP server details",
+	"connectorName": "SFTP File Server",
+	"connectorType": "File & API",
+	"connectorHost": "sftp.example.com",
+	"connectorPort": "22",
+	"fileFolderName": "/data/exports/",
+	"connectorUsername": "your_sftp_username",
+	"connectorPassword": "your_sftp_password",
+	"connectorAuthType": 12,
+	"institutionID": 0,
+	"internalID": "",
+	"ownerID": 0
+}

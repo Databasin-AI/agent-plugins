@@ -1,0 +1,16 @@
+{
+	"_comment": "MySQL Connector Template - Replace placeholder values with your actual configuration",
+	"connectorName": "MySQL Production",
+	"connectorType": "RDBMS",
+	"connectorHost": "mysql.example.com",
+	"connectorPort": "3306",
+	"connectorDatabaseName": "your_database_name",
+	"connectorUsername": "your_username",
+	"connectorPassword": "your_password",
+	"connectorAuthType": 2,
+	"connectorMaxConnections": 8,
+	"connectorAdditionalDetails": "",
+	"institutionID": 0,
+	"internalID": "",
+	"ownerID": 0
+}

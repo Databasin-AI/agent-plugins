@@ -1,0 +1,14 @@
+{
+	"_comment": "Amazon S3 Connector Template - Replace placeholder values with your actual AWS credentials",
+	"connectorName": "S3 Data Lake",
+	"connectorType": "File & API",
+	"connectorStorageAccountName": "your-bucket-name",
+	"fileFolderName": "/path/to/data/",
+	"connectorUsername": "AKIAIOSFODNN7EXAMPLE",
+	"connectorPassword": "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
+	"connectorAuthType": 7,
+	"connectorAdditionalDetails": "region=us-east-1",
+	"institutionID": 0,
+	"internalID": "",
+	"ownerID": 0
+}

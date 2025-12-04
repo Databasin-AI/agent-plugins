@@ -1,0 +1,18 @@
+{
+	"name": "databasin-tools",
+	"owner": {
+		"name": "Databasin Tools",
+		"email": "tools@databasin.ai"
+	},
+	"plugins": [
+		{
+			"name": "databasin",
+			"source": "../plugins/databasin",
+			"description": "Provides a variety of tools to interact with Databasin platform, including querying datasets, managing data pipelines, and accessing metadata.",
+			"version": "0.0.1",
+			"author": {
+				"name": "Databasin Team"
+			}
+		}
+	]
+}

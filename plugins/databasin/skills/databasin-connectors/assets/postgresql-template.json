@@ -1,0 +1,16 @@
+{
+	"_comment": "PostgreSQL Connector Template - Replace placeholder values with your actual configuration",
+	"connectorName": "PostgreSQL Production",
+	"connectorType": "RDBMS",
+	"connectorHost": "postgres.example.com",
+	"connectorPort": "5432",
+	"connectorDatabaseName": "your_database_name",
+	"connectorUsername": "your_username",
+	"connectorPassword": "your_password",
+	"connectorAuthType": 2,
+	"connectorMaxConnections": 8,
+	"connectorAdditionalDetails": "ssl=true",
+	"institutionID": 0,
+	"internalID": "",
+	"ownerID": 0
+}
