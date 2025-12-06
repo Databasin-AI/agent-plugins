@@ -16,31 +16,44 @@ This repository contains production-ready Claude Code plugins that enable AI age
 
 Complete integration plugin for the Databasin data platform, providing authenticated API access, JWT management, and specialized agents for data operations.
 
-**Location:** `plugins/databasin/`
+**Location:** `.claude-plugins/databasin/`
 
 **Key Features:**
 
-- JWT authentication and token management
 - Project and organization management
 - Data connector operations
 - Pipeline and automation control
 - Report generation and analytics
 - Specialized AI agents for API interaction
 
-**Quick Commands:**
+**Available Commands:**
 
 ```bash
-/databasin:list-projects      # List all accessible projects
-/databasin:list-connectors    # View data source connectors
-/databasin:get-user-info      # Show current user profile
-/databasin:refresh-token      # Refresh JWT authentication
-/databasin:api-health         # Check API server status
+# Project and Connector Management
+/databasin:list-projects       # List all accessible projects
+/databasin:list-connectors     # View all data source connectors
+
+# Creation Workflows
+/databasin:create-connector    # Create and test a new data connector with guided configuration
+/databasin:create-pipeline     # Create a DataBasin pipeline using interactive wizard
+/databasin:create-report       # Create a Reportbasin report with the report builder agent
 ```
+
+**Specialized Agents:**
+
+- **reportbasin-report-builder** - Expert data visualization architect for creating and iterating on Reportbasin reports with Apache ECharts
+
+**Available Skills:**
+
+- **databasin-automations** - Create, manage, and troubleshoot Databasin automations with scheduled and triggered tasks
+- **databasin-cli** - Comprehensive CLI tool expertise for connectors, pipelines, SQL queries, and data engineering workflows
+- **databasin-connectors** - Create, manage, and troubleshoot data connectors for 250+ data source types
+- **databasin-pipelines** - Create, modify, and manage data pipelines through natural language conversation
 
 **Documentation:**
 
-- [Plugin README](plugins/databasin/README.md) - Complete setup and usage guide
-- [Plugin Usage Guide](plugins/databasin/PLUGIN-USAGE.md) - SDK integration details
+- [Plugin README](.claude-plugins/databasin/README.md) - Complete setup and usage guide
+- [Plugin Usage Guide](.claude-plugins/databasin/PLUGIN-USAGE.md) - SDK integration details
 
 ## Getting Started
 
@@ -55,14 +68,14 @@ Complete integration plugin for the Databasin data platform, providing authentic
 1. Clone this repository:
 
 ```bash
-git clone https://github.com/Databasin-AI/agent-plugins.git
+git clone https://github.com/databasin-ai/agent-plugins.git
 cd agent-plugins
 ```
 
 2. Choose a plugin and follow its setup instructions:
 
 ```bash
-cd plugins/databasin
+cd .claude-plugins/databasin
 # Follow README.md for plugin-specific setup
 ```
 
