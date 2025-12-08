@@ -40,11 +40,18 @@ databasin projects stats <project-id>      # Show statistics
 
 ### Connector Operations
 ```bash
-databasin connectors list                              # List all connectors
+# IMPORTANT: connectors list defaults to COUNT MODE for efficiency
+databasin connectors list                              # Count connectors (default, efficient)
+databasin connectors list --full                       # List all connector objects (use with caution)
+databasin connectors list --full --fields id,name,type --limit 20  # Token-efficient listing
 databasin connectors get <connector-id>                # Get connector details
 databasin connectors create <config.json>              # Create new connector
 databasin connectors update <id> <config.json>         # Update connector
 databasin connectors delete <connector-id>             # Delete connector
+databasin connectors test <connector-id>               # Test connector connection
+databasin connectors config <subtype>                  # Get connector workflow screens (e.g., Postgres, MySQL)
+databasin connectors config --all                      # List all available connector types
+databasin connectors config <subtype> --screens        # Show detailed screen workflow
 ```
 
 ### SQL Interface & Data Exploration
@@ -58,11 +65,14 @@ databasin sql exec <connector-id> "<query>" --csv > output.csv             # Exp
 
 ### Pipeline Operations
 ```bash
-databasin pipelines list --project <project-id>        # List pipelines
+databasin pipelines template                           # Generate pipeline configuration template (RECOMMENDED)
+databasin pipelines list --project <project-id>        # List pipelines (project required)
 databasin pipelines get <pipeline-id>                  # Get pipeline details
-databasin pipelines create <config.json>               # Create pipeline
+databasin pipelines create <config.json> -p <project>  # Create pipeline from file
 databasin pipelines run <pipeline-id>                  # Run pipeline
 databasin pipelines logs <pipeline-id>                 # View logs (critical for troubleshooting)
+databasin pipelines history <pipeline-id>              # View execution history
+databasin pipelines artifacts                          # Manage pipeline artifacts
 ```
 
 ### Automation Management
@@ -70,8 +80,29 @@ databasin pipelines logs <pipeline-id>                 # View logs (critical for
 databasin automations list                             # List automations
 databasin automations list --project <project-id>      # List by project
 databasin automations get <automation-id>              # Get details
+databasin automations create <config.json>             # Create automation
 databasin automations run <automation-id>              # Run automation
+databasin automations stop <automation-id>             # Stop running automation
 databasin automations logs <automation-id>             # View logs
+databasin automations history <automation-id>          # View execution history
+databasin automations tasks                            # Manage automation tasks
+```
+
+### Documentation Access
+```bash
+databasin docs                                         # List all available documentation
+databasin docs quickstart                              # View quickstart guide
+databasin docs connectors-guide                        # View connectors guide
+databasin docs pipelines-guide                         # View pipelines guide
+databasin docs automations-guide                       # View automations guide
+databasin docs <name> --pretty                         # View with rich formatting
+```
+
+### Shell Completion
+```bash
+databasin completion install bash                      # Install bash completions
+databasin completion install zsh                       # Install zsh completions
+databasin completion install fish                      # Install fish completions
 ```
 
 ### Output Formatting
@@ -79,6 +110,11 @@ databasin automations logs <automation-id>             # View logs
 --json                    # JSON output
 --csv                     # CSV output
 --fields field1,field2    # Select specific fields
+--limit N                 # Limit number of results
+--count                   # Return count only
+--no-color                # Disable colored output
+--verbose                 # Enable verbose logging
+--debug                   # Enable debug mode with stack traces
 ```
 
 ## Critical Usage Patterns
@@ -94,10 +130,14 @@ databasin auth whoami
 When users ask "find data" or "show me data about X":
 
 ```bash
-# Step 1: List available connectors
+# Step 1: Count available connectors (fast, efficient)
 databasin connectors list
+# Output: 143 connectors
 
-# Step 2: Explore data hierarchy
+# Step 2: List connector details if needed (with token efficiency)
+databasin connectors list --full --fields connectorID,connectorName,connectorType --limit 20
+
+# Step 3: Explore data hierarchy
 databasin sql catalogs <connector-id>
 databasin sql schemas <connector-id> --catalog <catalog>
 databasin sql tables <connector-id> --catalog <catalog> --schema <schema>
@@ -133,7 +173,10 @@ databasin sql exec <connector-id> "SELECT 1"
 DATABASIN_DEBUG=true databasin pipelines run <pipeline-id>
 ```
 
-### 4. Building New Pipelines
+### 4. Building New Pipelines (FILE-BASED APPROACH)
+
+**IMPORTANT: Interactive wizards are not supported in AI agent workflows. Always use file-based configuration.**
+
 ```bash
 # Step 1: Verify source connector works
 databasin sql exec <source-id> "SELECT 1"
@@ -143,19 +186,16 @@ databasin sql catalogs <source-id>
 databasin sql tables <source-id> --catalog <catalog> --schema <schema>
 databasin sql exec <source-id> "SELECT * FROM <table> LIMIT 5"
 
-# Step 3: Create pipeline config file
-cat > pipeline.json << 'EOF'
-{
-  "name": "My Pipeline",
-  "sourceConnector": "<source-id>",
-  "targetConnector": "<target-id>",
-  "transformations": [],
-  "schedule": "0 6 * * *"
-}
-EOF
+# Step 3: Generate template
+databasin pipelines template > pipeline.json
 
-# Step 4: Create and test
-databasin pipelines create pipeline.json
+# Step 4: Edit configuration (add source, target, artifacts, schedule)
+# Modify pipeline.json with appropriate configuration
+
+# Step 5: Create pipeline from configuration
+databasin pipelines create pipeline.json -p <project-id>
+
+# Step 6: Test
 databasin pipelines run <pipeline-id>
 databasin pipelines logs <pipeline-id>
 ```
