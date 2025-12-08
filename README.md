@@ -1,119 +1,110 @@
-# Databasin AI Agent Plugins
+# Databasin CLI Plugin for Claude Code
 
-A collection of Claude Code plugins and integrations for extending AI agent capabilities with Databasin specific knowledge, skills, and automation.
+A comprehensive Claude Code plugin that provides expert assistance for using the Databasin CLI tool to manage data connectors, pipelines, automations, SQL queries, and data engineering workflows.
 
 ## Overview
 
-This repository contains production-ready Claude Code plugins that enable AI agents to interact with external systems, APIs, and services. Each plugin provides specialized agents, slash commands, and skills for seamless integration into your AI-powered workflows.
+This plugin extends Claude Code with specialized knowledge and skills for working with the Databasin platform CLI. It includes expert agents, slash commands, and comprehensive reference documentation to help you efficiently create connectors, build pipelines, execute queries, and manage your data infrastructure.
 
-### Install Claude Code Marketplace
+## Installation
 
-`/plugin marketplace add databasin-ai/agent-plugins`
+Install directly from the Claude Code Marketplace:
 
-## Available Plugins
-
-### Databasin Plugin
-
-Complete integration plugin for the Databasin data platform, providing authenticated API access, JWT management, and specialized agents for data operations.
-
-**Location:** `.claude-plugins/databasin/`
-
-**Key Features:**
-
-- Project and organization management
-- Data connector operations
-- Pipeline and automation control
-- Report generation and analytics
-- Specialized AI agents for API interaction
-
-**Available Commands:**
-
-```bash
-# Project and Connector Management
-/databasin:list-projects       # List all accessible projects
-/databasin:list-connectors     # View all data source connectors
-
-# Creation Workflows
-/databasin:create-connector    # Create and test a new data connector with guided configuration
-/databasin:create-pipeline     # Create a DataBasin pipeline using interactive wizard
-/databasin:create-report       # Create a Reportbasin report with the report builder agent
+```
+/plugin marketplace add databasin-ai/agent-plugins
 ```
 
-**Specialized Agents:**
+Or clone this repository to your Claude Code plugins directory.
 
-- **reportbasin-report-builder** - Expert data visualization architect for creating and iterating on Reportbasin reports with Apache ECharts
+## What This Plugin Provides
 
-**Available Skills:**
+### Slash Commands
 
-- **databasin-automations** - Create, manage, and troubleshoot Databasin automations with scheduled and triggered tasks
-- **databasin-cli** - Comprehensive CLI tool expertise for connectors, pipelines, SQL queries, and data engineering workflows
-- **databasin-connectors** - Create, manage, and troubleshoot data connectors for 250+ data source types
-- **databasin-pipelines** - Create, modify, and manage data pipelines through natural language conversation
+Quick-access commands for common Databasin CLI workflows:
 
-**Documentation:**
+- `/databasin:list-projects` - List all accessible Databasin projects
+- `/databasin:list-connectors` - View all data source connectors in your project
+- `/databasin:create-connector` - Create and configure a new data connector with guided setup
+- `/databasin:create-pipeline` - Build a data pipeline using interactive wizard or CLI workflow
+- `/databasin:create-report` - Create a Reportbasin report with expert guidance
 
-- [Plugin README](.claude-plugins/databasin/README.md) - Complete setup and usage guide
-- [Plugin Usage Guide](.claude-plugins/databasin/PLUGIN-USAGE.md) - SDK integration details
+### Expert Skills
 
-## Getting Started
+Specialized skills that provide deep expertise in specific areas:
 
-### Prerequisites
+- **databasin-cli** - Comprehensive CLI tool expertise covering authentication, projects, connectors, pipelines, SQL queries, automations, and data engineering workflows
+- **databasin-connectors** - Expert guidance for creating, configuring, and troubleshooting data connectors for 250+ data source types (databases, SaaS apps, cloud storage, APIs)
+- **databasin-pipelines** - Pipeline creation, modification, and management through natural language conversation with full CLI integration
+- **databasin-automations** - Create, schedule, and troubleshoot Databasin automations with cron scheduling and task orchestration
+
+### Specialized Agent
+
+- **databasin-pipeline-creator** - Elite pipeline architect agent that guides you through the complete pipeline creation lifecycle, from requirements gathering to deployment
+
+## Key Capabilities
+
+This plugin helps you:
+
+- Authenticate with Databasin and manage CLI sessions
+- Create and configure data connectors for 250+ source types
+- Build ETL/ELT data pipelines with field mapping and transformations
+- Execute SQL queries against Trino-connected data sources
+- Explore database schemas and metadata
+- Set up scheduled automations and workflows
+- Troubleshoot pipeline failures using log analysis
+- Manage projects, users, and permissions
+- Find specific data using natural language queries
+
+## Quick Start
+
+1. Install the plugin from the Claude Code Marketplace
+2. Ensure you have the Databasin CLI installed and configured
+3. Use slash commands like `/databasin:list-projects` to get started
+4. Ask Claude for help with any Databasin CLI task
+
+## Example Usage
+
+```
+User: I need to create a connector to Salesforce
+Claude: I'll help you create a Salesforce connector using the databasin CLI...
+[Uses databasin-connectors skill to guide through setup]
+
+User: /databasin:create-pipeline
+Claude: [Launches databasin-pipelines skill for interactive pipeline creation]
+
+User: How do I query data from my PostgreSQL connector?
+Claude: [Uses databasin-cli skill to explain SQL query syntax and provide examples]
+```
+
+## Requirements
 
 - Claude Code
-- Node.js or Bun runtime
-- Plugin-specific dependencies (see individual plugin documentation)
+- Databasin CLI tool installed and accessible in your PATH
+- Active Databasin account with appropriate permissions
 
-### Installation
+## Documentation
 
-1. Clone this repository:
-
-```bash
-git clone https://github.com/databasin-ai/agent-plugins.git
-cd agent-plugins
-```
-
-2. Choose a plugin and follow its setup instructions:
-
-```bash
-cd .claude-plugins/databasin
-# Follow README.md for plugin-specific setup
-```
+- [Plugin Usage Guide](.claude-plugin/databasin/PLUGIN-USAGE.md) - Detailed usage instructions and examples
+- [Plugin README](.claude-plugin/databasin/README.md) - Complete plugin documentation
 
 ## Contributing
 
-Contributions are welcome! Please follow these guidelines:
+Contributions are welcome! Please:
 
-1. **Fork the repository** and create a feature branch
-2. **Follow the plugin architecture** described above
-3. **Include comprehensive documentation** for all components
-4. **Test thoroughly** before submitting
-5. **Submit a pull request** with a clear description of changes
-
-### Contribution Areas
-
-- New plugin integrations
-- Enhanced agent capabilities
-- Additional slash commands
-- Improved documentation
-- Bug fixes and optimizations
+1. Fork the repository and create a feature branch
+2. Include comprehensive documentation for any new features
+3. Test thoroughly before submitting
+4. Submit a pull request with a clear description of changes
 
 ## License
 
-This repository is licensed under [CC-BY-4.0](https://creativecommons.org/licenses/by/4.0/) - see individual plugin licenses for specific terms.
-
-## Resources
-
-- [Anthropic Agent SDK](https://github.com/anthropics/anthropic-sdk-typescript)
-- [Claude Code Documentation](https://docs.anthropic.com/claude/docs/claude-code)
-- [Plugin Development Guide](https://docs.anthropic.com/claude/docs/plugins)
+This plugin is licensed under [CC-BY-4.0](https://creativecommons.org/licenses/by/4.0/).
 
 ## Support
 
-For issues, questions, or contributions:
-
 - **Issues:** [GitHub Issues](https://github.com/Databasin-AI/agent-plugins/issues)
 - **Discussions:** [GitHub Discussions](https://github.com/Databasin-AI/agent-plugins/discussions)
-- **Documentation:** See individual plugin README files
+- **Documentation:** [Databasin Documentation](https://databasin.ai/docs)
 
 ## Maintained By
 

@@ -496,7 +496,7 @@ The `notebookPath` must be the **full path** to the notebook in your Databricks 
 **Valid Path Formats:**
 
 ```
-/Users/user@example.com/notebooks/my_notebook
+/Workspace/notebooks/my_notebook
 /Shared/analytics/daily_report
 /Repos/my-org/my-repo/notebooks/etl_process
 /analytics/customer_segmentation

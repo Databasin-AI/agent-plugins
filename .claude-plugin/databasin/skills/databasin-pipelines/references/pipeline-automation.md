@@ -1,393 +1,770 @@
-# Pipeline Creation Automation Guide
+# Pipeline Creation Guide
 
-This document outlines the complete pipeline creation process for Databasin, designed to help you build CLI scripts or automated tools that create pipelines programmatically.
+This document provides a comprehensive guide for creating data pipelines using the Databasin CLI. Pipelines move data between connectors with optional transformations, scheduling, and automation.
 
-## Pipeline Creation Process Outline
+## Understanding Pipeline Creation
 
-### Step 0: Prerequisites & Initialization
+Creating a pipeline in Databasin involves several steps that vary based on the source and target connector types. The CLI provides both interactive and file-based approaches to pipeline creation.
 
-**What you need:**
+### Key Concepts
 
-- User credentials (institutionID, ownerID, internalID/projectId)
-- Available connectors for the project (fetch from `/connector` endpoint)
-- Connector configurations (loaded from `static/config/connectors/`)
-- Pipeline configuration settings
+**Pipeline Components:**
+- **Source Connector** - Where data comes from (must support egress)
+- **Target Connector** - Where data goes to (must support ingress)
+- **Artifacts** - The data objects being moved (tables, files, API endpoints)
+- **Ingestion Pattern** - How data is stored: "datalake" or "data warehouse"
+- **Schedule** - When the pipeline runs (cron format)
 
-**API Call:**
+**Connector Requirements:**
+- Source connectors must have `egressTargetSupport: true`
+- Target connectors must have `ingressTargetSupport: true`
+- Use `databasin connectors config <type>` to verify connector capabilities
 
-```
-GET /connector?institutionID={id}&internalID={projectId}
-```
+## Pipeline Creation Workflow
 
----
+The pipeline creation process follows a multi-step workflow that adapts based on connector types. Understanding this workflow helps you gather the right information before creating a pipeline.
 
-### Step 1: Initial Configuration (Screen 0)
+### Step 0: Prerequisites
 
-**Information Required:**
+Before creating a pipeline, gather the following information:
 
-- **pipelineName** - String, max 27 chars
-- **sourceConnectorID** - Integer (must have `egressTargetSupport: true`)
-- **targetConnectorID** - Integer (must have `ingressTargetSupport: true`)
-- **ingestionPattern** - "datalake" OR "data warehouse"
-- **targetCatalogName** - String (required if data warehouse mode)
-- **targetSchemaName** - String (required if datalake mode)
-- **createCatalogs** - Boolean (auto-create catalogs)
-- **sourceNamingConvention** - Boolean (true = short names, false = long names)
+1. **Project Information**
+   ```bash
+   # List available projects
+   databasin projects list
+   ```
 
-**Validation:**
+2. **Available Connectors**
+   ```bash
+   # List connectors in your project
+   databasin connectors list --project <projectId> --full
 
-- Pipeline name must be non-empty
-- Source and target connectors must be selected
-- If data warehouse: targetCatalogName required
-- If datalake: targetSchemaName required
+   # View connector details
+   databasin connectors get <connectorId>
 
-**Note:** When you select the source connector, fetch its wizard config:
+   # Check connector configuration
+   databasin connectors config <connectorType>
+   ```
 
-```javascript
-const wizardConfig = await configClient.getPipelineWizardConfiguration(
-	sourceConnector.connectorSubType
-);
-// This tells you which screens (1-10) you need to complete
-const requiredScreens = wizardConfig.sourceConnector.pipelineRequiredScreens;
-```
+3. **Pipeline Configuration Settings**
+   - Pipeline name (max 27 characters)
+   - Ingestion pattern (datalake or data warehouse)
+   - Target catalog/schema names
+   - Schedule (cron format)
+   - Cluster size (S, M, L, XL)
 
----
+### Step 1: Initial Configuration
 
-### Step 2: Navigate Dynamic Screens (Varies by Connector)
+**Required Information:**
+- `pipelineName` - String, max 27 characters
+- `sourceConnectorId` - Connector ID with egress support
+- `targetConnectorId` - Connector ID with ingress support
+- `ingestionPattern` - "datalake" or "data warehouse"
+- `targetCatalogName` - Required for data warehouse pattern
+- `targetSchemaName` - Required for datalake pattern
+- `createCatalogs` - Auto-create catalogs (boolean)
+- `sourceNamingConvention` - true = short names, false = long names
 
-The **requiredScreens** array determines which screens you hit. Common patterns:
+**Discovery Commands:**
 
-#### **For Database Connectors (e.g., MySQL, PostgreSQL)**
+```bash
+# Find connectors that support egress (source)
+databasin connectors list --project <projectId> --full --json | \
+  jq '.[] | select(.egressTargetSupport == true)'
 
-**Typical flow:** `[1, 2, 3, 4, 5]` (Catalogs → Artifacts → Columns → Ingest → Final)
+# Find connectors that support ingress (target)
+databasin connectors list --project <projectId> --full --json | \
+  jq '.[] | select(.ingressTargetSupport == true)'
 
-**Screen 1 - Catalogs:**
-
-```
-GET /connector/catalogs/{connectorID}
-```
-
-- Select a catalog from the list
-- Store as `selectedCatalog`
-
-**Screen 2 - Artifacts (Tables):**
-
-```
-GET /v2/connector/tables/{connectorID}?schema={selectedSchema}&catalog={selectedCatalog}
-```
-
-- Select one or more tables/artifacts
-- Store as array: `selectedArtifacts`
-
-**Screen 3 - Columns:**
-
-```
-POST /connector/columns
-Body: { connectorID, objects: [selectedArtifacts], chosenDatabaseSchema: selectedSchema }
+# View connector workflow requirements
+databasin connectors config <connectorType> --screens
 ```
 
-- For each artifact, select which columns to ingest
-- Store as: `selectedColumns[tableName] = [column1, column2, ...]`
+### Step 2: Connector-Specific Workflows
 
-**Screen 4 - Ingestion Options:**
+Different connector types require different discovery steps. The CLI helps you navigate these based on the connector configuration.
 
-```
-POST /connector/ingestiontype
-Body: { connectorID, objects: [selectedArtifacts], chosenDatabaseSchema: selectedSchema }
-```
+#### Database Connectors (MySQL, PostgreSQL, SQL Server)
 
-- For each artifact, configure:
-  - ingestionType (full, delta, snapshot)
-  - watermarkColumnName (for delta)
-  - mergeColumns (for delta)
-  - backloadNumDays
-  - snapshotRetentionPeriod
-  - detectDeletes (for delta with merge)
-  - autoExplode (for nested data)
+**Typical Workflow:** Catalogs → Schemas → Tables → Columns → Ingestion Options
 
----
+**Discovery Process:**
 
-#### **For File Connectors (e.g., S3, Azure Blob)**
+1. **List Available Catalogs/Databases**
+   - Some databases organize objects in catalogs (databases)
+   - Others use schemas directly
+   - Check connector config to understand the hierarchy
 
-**Typical flow:** `[2, 4, 5]` (Artifacts → Ingest → Final)
+2. **List Schemas**
+   - Schemas contain the actual tables
+   - Select the schema that contains your target tables
 
-**Screen 2 - Artifacts (Files):**
+3. **Select Tables (Artifacts)**
+   - Choose which tables to include in the pipeline
+   - Can select multiple tables in a single pipeline
 
-- Can enter wildcard patterns (e.g., `*.csv`, `data_*.json`)
-- Or select individual files from connector
-- Store as: `selectedArtifacts`
+4. **Select Columns**
+   - For each table, choose which columns to ingest
+   - Omitting this step includes all columns
+   - Useful for excluding sensitive data
 
-**Screen 4 - Ingestion Options:**
+5. **Configure Ingestion Options**
+   - **Ingestion Type:**
+     - `full` - Complete table replacement each run
+     - `delta` - Only new/changed records (requires watermark column)
+     - `snapshot` - Point-in-time copies with retention
+   - **Watermark Column** - Column for delta tracking (e.g., `updated_at`)
+   - **Merge Columns** - Primary key columns for delta merges
+   - **Backload Days** - How many days to backfill initially
+   - **Snapshot Retention** - How many snapshots to keep
+   - **Detect Deletes** - Track deleted records (delta mode with merge)
+   - **Auto Explode** - Automatically flatten nested data structures
 
-- Per file configuration:
-  - sourceFileName (the file path/pattern)
-  - sourceFileFormat (csv, json, parquet, xml, etc.)
-  - containsHeader (for CSV)
-  - columnHeaderLineNumber (for CSV)
-  - sourceFileDelimiter (for CSV/TXT)
-  - autoExplode (for JSON/nested formats)
-  - rowTag (for XML)
-  - xsdPath (for XML)
+**Example: Database Pipeline Configuration**
 
----
-
-#### **For API Connectors**
-
-**Typical flow:** `[8, 9, 10, 4, 5]` or `[10, 4, 5]` (API Config → Auth → Generic → Ingest → Final)
-
-**Screen 8 - API Configuration:** Legacy API config screen
-**Screen 9 - API Authentication:** OAuth/token setup
-**Screen 10 - Generic API Configuration:** Modern API config
-
-Configuration includes:
-
-- API endpoint URL
-- Authentication method
-- Request payload
-- Response format
-
----
-
-### Step 3: Final Configuration (Screen 5)
-
-**Job Details Required:**
-
-- **tags** - String array (optional)
-- **jobClusterSize** - "S" | "M" | "L" | "XL"
-- **emailNotifications** - Email array
-- **jobRunSchedule** - Cron string (e.g., "0 10 \* \* \*")
-- **jobRunTimeZone** - Timezone string (e.g., "UTC")
-- **jobTimeout** - Integer (seconds, default 43200)
-
-**Validation:**
-
-- Schedule, timeout, and cluster size must all be set
-
----
-
-### Step 4: Build Final Payload & Create
-
-**Assemble the complete payload:**
-
-```javascript
+```json
 {
-  institutionID: Number,
-  internalID: String,
-  ownerID: Number,
-  pipelineName: String,
-  isPrivate: 0 | 1,
-  connectorTechnology: [sourceConnectorSubType],
-  targetCatalogName: String,
-  targetSchemaName: String,
-  ingestionPattern: "data warehouse" | "datalake",
-  createCatalogs: Boolean,
-  sourceNamingConvention: Boolean,
-  jobDetails: {
-    tags: [],
-    jobClusterSize: String,
-    emailNotifications: [],
-    jobRunSchedule: String,
-    jobRunTimeZone: String,
-    jobTimeout: String
+  "pipelineName": "MySQL to Snowflake",
+  "sourceConnectorId": "mysql-prod-123",
+  "targetConnectorId": "snowflake-dw-456",
+  "ingestionPattern": "data warehouse",
+  "targetCatalogName": "analytics",
+  "createCatalogs": false,
+  "sourceNamingConvention": true,
+  "jobDetails": {
+    "tags": ["production", "daily"],
+    "jobClusterSize": "M",
+    "emailNotifications": ["team@example.com"],
+    "jobRunSchedule": "0 2 * * *",
+    "jobRunTimeZone": "UTC",
+    "jobTimeout": "43200"
   },
-  items: [
+  "items": [
     {
-      sourceConnectionID: Number,
-      targetConnectionID: Number,
-      artifactType: Number, // derived from connector type
-      sourceDatabaseName: String,
-      sourceSchemaName: String,
-      sourceTableName: String,
-      sourceColumnNames: [String] | null, // null = all columns
-      targetDatabaseName: String,
-      targetSchemaName: String,
-      targetTableName: String,
-      ingestionType: String,
-      watermarkColumnName: [],
-      mergeColumns: [],
-      backloadNumDays: Number,
-      snapshotRetentionPeriod: Number,
-      detectDeletes: Boolean,
-      autoExplode: Boolean,
-      // File-specific fields
-      sourceFileName: String,
-      sourceFileFormat: String,
-      sourceFileDelimiter: String,
-      containsHeader: Boolean,
-      columnHeaderLineNumber: Number,
-      // API-specific fields
-      apiRoute: String,
-      apiCallType: String,
-      apiPayload: String,
-      apiResponseFormat: String
+      "sourceConnectionID": "mysql-prod-123",
+      "targetConnectionID": "snowflake-dw-456",
+      "sourceDatabaseName": "production",
+      "sourceSchemaName": "public",
+      "sourceTableName": "users",
+      "sourceColumnNames": ["id", "email", "created_at", "updated_at"],
+      "targetDatabaseName": "analytics",
+      "targetSchemaName": "staging",
+      "targetTableName": "users",
+      "ingestionType": "delta",
+      "watermarkColumnName": ["updated_at"],
+      "mergeColumns": ["id"],
+      "backloadNumDays": 7,
+      "detectDeletes": true,
+      "autoExplode": false
     }
-    // ... one item per selected artifact
   ]
 }
 ```
 
-**Submit:**
+#### File Storage Connectors (S3, Azure Blob, Google Cloud Storage)
 
-```
-POST /pipeline
-Body: JSON.stringify(payload)
-```
+**Typical Workflow:** Files/Patterns → Ingestion Options
 
----
+**Discovery Process:**
 
-## Key Gotchas for CLI Implementation
+1. **Identify File Patterns**
+   - Use wildcard patterns (e.g., `*.csv`, `data_*.json`)
+   - Or specify individual file paths
+   - File connector configurations determine available paths
 
-### 1. Connector Type Mapping
+2. **Configure File Ingestion**
+   - **Source File Name** - File path or pattern
+   - **Source File Format** - csv, json, parquet, xml, avro, etc.
+   - **Contains Header** - For CSV files, first row is header
+   - **Column Header Line** - Which line contains column names (CSV)
+   - **File Delimiter** - Delimiter character (CSV/TXT)
+   - **Auto Explode** - Flatten nested JSON structures
+   - **Row Tag** - XML element that represents a row
+   - **XSD Path** - XML schema definition file location
 
-Need to map connector subType (e.g., "mysql") to artifactType ID (1=RDBMS, 3=File, etc.)
+**Example: S3 CSV Pipeline Configuration**
 
-- Reference: `src/lib/pipelines/PipelinesApiClient.js:88`
-
-### 2. Data Type Conversions
-
-Backend is picky about types:
-
-- `isPrivate`: Boolean → 0|1
-- `jobTimeout`: Number → String
-- Boolean fields like `containsHeader`, `detectDeletes` need careful handling
-
-### 3. Dynamic Screens
-
-Each connector config defines which screens to show via `pipelineRequiredScreens`
-
-- Don't assume all connectors follow the same path
-
-### 4. Column Selection
-
-- `null` = all columns
-- Array = specific columns only
-- Track which tables were "modified" to know when to send the array
-
-### 5. File Format Detection
-
-Auto-detect from extension (`.csv`, `.json`, etc.) and set appropriate defaults
-
-- Reference: `src/lib/pipelines/ArtifactWizardViewModelBase.svelte.js:656`
-
-### 6. Validation Per Screen
-
-Each screen has its own validation logic:
-
-- **Initial**: name + connectors + target config
-- **Artifacts**: at least 1 selected
-- **Columns**: at least 1 column across all tables
-- **Ingest**: all items must be valid
-- **Final**: schedule + cluster + timeout set
-
----
-
-## Implementation Strategy
-
-### Option 1: Interactive CLI
-
-Prompt user for each piece of information in sequence:
-
-1. List available connectors, ask user to select source and target
-2. Fetch wizard config to determine required screens
-3. Walk through each screen, prompting for necessary data
-4. Build final payload and submit
-
-### Option 2: Configuration File
-
-Accept a JSON/YAML config file with all required information:
-
-```yaml
-pipeline:
-  name: 'My Pipeline'
-  sourceConnector: 'mysql-connector-1'
-  targetConnector: 'snowflake-connector-1'
-  ingestionPattern: 'data warehouse'
-  targetCatalog: 'analytics'
-
-artifacts:
-  - table: 'users'
-    columns: ['id', 'email', 'created_at']
-    ingestionType: 'delta'
-    watermark: 'updated_at'
-  - table: 'orders'
-    columns: null # all columns
-    ingestionType: 'full'
-
-schedule:
-  cron: '0 10 * * *'
-  timezone: 'UTC'
-  clusterSize: 'M'
+```json
+{
+  "pipelineName": "S3 CSV Ingestion",
+  "sourceConnectorId": "s3-bucket-123",
+  "targetConnectorId": "snowflake-dw-456",
+  "ingestionPattern": "datalake",
+  "targetSchemaName": "raw_data",
+  "createCatalogs": true,
+  "sourceNamingConvention": false,
+  "jobDetails": {
+    "tags": ["s3", "csv"],
+    "jobClusterSize": "L",
+    "emailNotifications": ["data-team@example.com"],
+    "jobRunSchedule": "0 */4 * * *",
+    "jobRunTimeZone": "America/New_York",
+    "jobTimeout": "21600"
+  },
+  "items": [
+    {
+      "sourceConnectionID": "s3-bucket-123",
+      "targetConnectionID": "snowflake-dw-456",
+      "sourceFileName": "sales/daily_*.csv",
+      "sourceFileFormat": "csv",
+      "containsHeader": true,
+      "columnHeaderLineNumber": 1,
+      "sourceFileDelimiter": ",",
+      "targetSchemaName": "raw_data",
+      "targetTableName": "daily_sales",
+      "ingestionType": "full",
+      "autoExplode": false
+    }
+  ]
+}
 ```
 
-### Option 3: Programmatic API
+#### Cloud Data Warehouse Connectors (Snowflake, Databricks)
 
-Create a library that exposes methods for each step:
+**Typical Workflow:** Databases → Schemas → Tables → Columns → Ingestion Options
 
-```javascript
-const pipelineBuilder = new PipelineBuilder(credentials);
-await pipelineBuilder.setConnectors(sourceId, targetId);
-await pipelineBuilder.selectArtifacts(['table1', 'table2']);
-await pipelineBuilder.configureIngestion({ ... });
-await pipelineBuilder.setSchedule({ ... });
-const result = await pipelineBuilder.create();
+Similar to database connectors, but may have additional hierarchy levels:
+- **Databases** - Top-level organizational unit
+- **Schemas** - Second-level organizational unit
+- **Tables** - Actual data objects
+
+**Discovery Tips:**
+
+```bash
+# View the required workflow for a connector
+databasin connectors config Snowflake --screens
+
+# Example output shows:
+# 1. [6] Database - Choose database/catalog
+# 2. [7] Schemas - Choose schema
+# 3. [2] Artifacts - Select tables
+# 4. [3] Columns - Select columns
+# 5. [4] Data Ingestion Options - Configure ingestion
+# 6. [5] Final Configuration - Schedule and cluster
 ```
 
----
+#### API Connectors
 
-## Screen Flow Reference
+**Typical Workflow:** API Configuration → Authentication → Ingestion Options
 
-### Screen ID Mapping
+**Configuration Requirements:**
+- **API Endpoint URL** - The full URL to the API endpoint
+- **API Call Type** - GET, POST, PUT, DELETE
+- **Authentication Method** - OAuth, token, basic auth
+- **Request Payload** - Body for POST/PUT requests
+- **Response Format** - JSON, XML, CSV
 
-- **0**: Initial configuration (always required)
-- **1**: Catalogs selection
-- **2**: Artifacts/Tables selection
-- **3**: Columns selection
-- **4**: Ingestion options
-- **5**: Final configuration (always required)
-- **6**: Databases selection (alternative to catalogs)
-- **7**: Schemas selection
-- **8**: API Configuration (legacy)
-- **9**: API Authentication
-- **10**: Generic API Configuration (modern)
+**Example: REST API Pipeline Configuration**
 
-### Common Screen Flows by Connector Type
+```json
+{
+  "pipelineName": "Salesforce API Extract",
+  "sourceConnectorId": "salesforce-api-123",
+  "targetConnectorId": "snowflake-dw-456",
+  "ingestionPattern": "datalake",
+  "targetSchemaName": "salesforce_raw",
+  "createCatalogs": true,
+  "sourceNamingConvention": true,
+  "jobDetails": {
+    "tags": ["api", "salesforce"],
+    "jobClusterSize": "S",
+    "emailNotifications": ["integrations@example.com"],
+    "jobRunSchedule": "0 1 * * *",
+    "jobRunTimeZone": "UTC",
+    "jobTimeout": "7200"
+  },
+  "items": [
+    {
+      "sourceConnectionID": "salesforce-api-123",
+      "targetConnectionID": "snowflake-dw-456",
+      "apiRoute": "/services/data/v52.0/query",
+      "apiCallType": "GET",
+      "apiPayload": "SELECT Id, Name, Email FROM Contact WHERE LastModifiedDate > YESTERDAY",
+      "apiResponseFormat": "json",
+      "targetSchemaName": "salesforce_raw",
+      "targetTableName": "contacts",
+      "ingestionType": "full",
+      "autoExplode": true
+    }
+  ]
+}
+```
+
+### Step 3: Final Configuration
+
+**Job Details Required:**
+- `tags` - Array of strings for categorization (optional)
+- `jobClusterSize` - Compute resources: "S", "M", "L", or "XL"
+- `emailNotifications` - Array of email addresses for alerts
+- `jobRunSchedule` - Cron expression (e.g., "0 10 * * *")
+- `jobRunTimeZone` - Timezone string (e.g., "UTC", "America/New_York")
+- `jobTimeout` - Maximum runtime in seconds (default: 43200 = 12 hours)
+
+**Cluster Size Guidelines:**
+- **S (Small)** - Light workloads, small files, API calls
+- **M (Medium)** - Standard database ingestion, moderate file sizes
+- **L (Large)** - High-volume data transfers, large file processing
+- **XL (Extra Large)** - Massive datasets, complex transformations
+
+**Cron Schedule Examples:**
+```bash
+# Every day at 2 AM UTC
+"0 2 * * *"
+
+# Every 4 hours
+"0 */4 * * *"
+
+# Every Monday at 8 AM
+"0 8 * * 1"
+
+# First day of month at midnight
+"0 0 1 * *"
+
+# Every 15 minutes (for testing)
+"*/15 * * * *"
+```
+
+### Step 4: Create the Pipeline
+
+**Using CLI Commands:**
+
+```bash
+# Create from configuration file
+databasin pipelines create pipeline-config.json
+
+# Interactive creation (simplified)
+databasin pipelines create --project <projectId>
+
+# View created pipeline
+databasin pipelines get <pipelineId>
+
+# Run the pipeline
+databasin pipelines run <pipelineId>
+```
+
+## Implementation Strategies
+
+### Strategy 1: Interactive CLI Mode
+
+Use the interactive wizard for simple pipelines:
+
+```bash
+# Start interactive creation
+databasin pipelines create
+
+# Prompts will guide you through:
+# 1. Project selection
+# 2. Pipeline name
+# 3. Source connector
+# 4. Target connector
+# 5. Schedule configuration
+```
+
+**Best for:**
+- Quick pipeline setup
+- Learning the pipeline creation process
+- Simple source-to-target data movement
+
+**Limitations:**
+- Limited artifact configuration support
+- No advanced ingestion options
+- Cannot specify column selection
+
+### Strategy 2: Configuration File
+
+Create a JSON file with complete pipeline configuration:
+
+```bash
+# 1. Create configuration file
+cat > my-pipeline.json <<EOF
+{
+  "pipelineName": "My Data Pipeline",
+  "sourceConnectorId": "source-123",
+  "targetConnectorId": "target-456",
+  ...
+}
+EOF
+
+# 2. Create pipeline from file
+databasin pipelines create my-pipeline.json
+
+# 3. Verify and run
+databasin pipelines get <pipelineId>
+databasin pipelines run <pipelineId>
+```
+
+**Best for:**
+- Complex pipeline configurations
+- Repeatable pipeline creation
+- Version-controlled pipeline definitions
+- Automation and scripting
+
+### Strategy 3: Programmatic Approach
+
+Use the CLI in scripts for batch operations:
+
+```bash
+#!/bin/bash
+# Create multiple similar pipelines
+
+TABLES=("users" "orders" "products")
+for table in "${TABLES[@]}"; do
+  cat > "${table}-pipeline.json" <<EOF
+  {
+    "pipelineName": "Sync ${table}",
+    "sourceConnectorId": "mysql-prod",
+    "targetConnectorId": "snowflake-dw",
+    "items": [{
+      "sourceTableName": "${table}",
+      "targetTableName": "${table}",
+      ...
+    }]
+  }
+EOF
+
+  databasin pipelines create "${table}-pipeline.json"
+done
+```
+
+**Best for:**
+- Bulk pipeline creation
+- Standardized pipeline patterns
+- Multi-table synchronization
+- Automated deployment
+
+## Common Pipeline Patterns
+
+### Pattern 1: Full Table Replication
+
+Complete table replacement on each run:
+
+```json
+{
+  "items": [{
+    "sourceTableName": "customers",
+    "targetTableName": "customers",
+    "ingestionType": "full",
+    "sourceColumnNames": null
+  }]
+}
+```
+
+**Use when:**
+- Small to medium tables
+- Source data changes frequently
+- No reliable timestamp column
+- Simplicity is preferred
+
+### Pattern 2: Delta Ingestion
+
+Capture only new or changed records:
+
+```json
+{
+  "items": [{
+    "sourceTableName": "orders",
+    "targetTableName": "orders",
+    "ingestionType": "delta",
+    "watermarkColumnName": ["updated_at"],
+    "mergeColumns": ["order_id"],
+    "backloadNumDays": 7,
+    "detectDeletes": true
+  }]
+}
+```
+
+**Use when:**
+- Large tables
+- Reliable timestamp/sequence column exists
+- Need to detect deleted records
+- Minimize data transfer volume
+
+### Pattern 3: Snapshot Management
+
+Maintain historical point-in-time copies:
+
+```json
+{
+  "items": [{
+    "sourceTableName": "inventory",
+    "targetTableName": "inventory_snapshots",
+    "ingestionType": "snapshot",
+    "snapshotRetentionPeriod": 30
+  }]
+}
+```
+
+**Use when:**
+- Need historical data views
+- Tracking changes over time
+- Compliance requirements
+- Trend analysis
+
+### Pattern 4: Multi-Table Synchronization
+
+Single pipeline for related tables:
+
+```json
+{
+  "pipelineName": "E-commerce Sync",
+  "items": [
+    {
+      "sourceTableName": "customers",
+      "targetTableName": "customers",
+      "ingestionType": "delta",
+      "watermarkColumnName": ["updated_at"]
+    },
+    {
+      "sourceTableName": "orders",
+      "targetTableName": "orders",
+      "ingestionType": "delta",
+      "watermarkColumnName": ["created_at"]
+    },
+    {
+      "sourceTableName": "products",
+      "targetTableName": "products",
+      "ingestionType": "full"
+    }
+  ]
+}
+```
+
+**Use when:**
+- Related tables need consistent timing
+- Maintaining referential integrity
+- Simplifying pipeline management
+
+### Pattern 5: File Pattern Processing
+
+Process multiple files matching a pattern:
+
+```json
+{
+  "items": [{
+    "sourceFileName": "logs/app-*.json",
+    "sourceFileFormat": "json",
+    "targetTableName": "application_logs",
+    "ingestionType": "full",
+    "autoExplode": true
+  }]
+}
+```
+
+**Use when:**
+- Regular file drops
+- Consistent file naming convention
+- Automated file processing
+
+## Key Considerations
+
+### 1. Data Type Handling
+
+When creating pipeline configurations:
+- Boolean fields should be JSON booleans: `true` or `false`
+- Numeric fields should be numbers: `3306`, not `"3306"`
+- Timeout values are strings: `"43200"`
+- Arrays for watermark/merge columns: `["column_name"]`
+
+### 2. Column Selection
+
+**All Columns:**
+```json
+"sourceColumnNames": null
+```
+
+**Specific Columns:**
+```json
+"sourceColumnNames": ["id", "name", "email", "created_at"]
+```
+
+**When to limit columns:**
+- Exclude sensitive data (SSN, passwords)
+- Reduce data transfer volume
+- Target schema has different structure
+- Compliance requirements
+
+### 3. Ingestion Type Selection
+
+**Choose Full when:**
+- Table is small (< 1M rows)
+- Complete refresh is acceptable
+- No reliable watermark column
+- Simplicity is priority
+
+**Choose Delta when:**
+- Table is large (> 1M rows)
+- Watermark column exists
+- Minimize data transfer
+- Need deleted record detection
+
+**Choose Snapshot when:**
+- Historical tracking required
+- Need point-in-time analysis
+- Regulatory compliance
+- Change tracking
+
+### 4. Schedule Optimization
+
+**Considerations:**
+- Avoid overlapping runs (timeout > typical runtime)
+- Align with source system batch windows
+- Consider timezone differences
+- Balance freshness vs. resource usage
+
+**Monitoring:**
+```bash
+# Check pipeline status
+databasin pipelines get <pipelineId>
+
+# View recent executions (when available)
+databasin pipelines logs <pipelineId>
+```
+
+### 5. Error Handling
+
+Pipeline configuration validation happens at creation time. Common validation errors:
+
+- **Missing required fields** - Check configuration completeness
+- **Invalid connector IDs** - Verify connectors exist and have correct support
+- **Invalid cron schedule** - Validate cron expression syntax
+- **Column selection errors** - Ensure columns exist in source
+- **Type mismatches** - Verify data types in configuration
+
+### 6. Performance Tuning
+
+**Cluster Size Selection:**
+- Start with M (Medium) for most workloads
+- Monitor execution time
+- Scale up for slow pipelines
+- Scale down to reduce costs
+
+**Optimization Tips:**
+- Use delta ingestion for large tables
+- Limit columns to needed fields only
+- Batch related tables in single pipeline
+- Schedule during off-peak hours
+
+## Workflow Reference
+
+### Common Workflows by Connector Type
 
 **RDBMS (MySQL, PostgreSQL, SQL Server):**
-
-```
-[0, 1, 2, 3, 4, 5]
-Initial → Catalogs → Artifacts → Columns → Ingest → Final
-```
+1. Select database/catalog
+2. Select schema
+3. Select tables (artifacts)
+4. Select columns (optional)
+5. Configure ingestion options
+6. Set schedule and cluster size
 
 **File Storage (S3, Azure Blob):**
-
-```
-[0, 2, 4, 5]
-Initial → Artifacts → Ingest → Final
-```
+1. Specify file patterns
+2. Configure file format options
+3. Configure ingestion options
+4. Set schedule and cluster size
 
 **Cloud Warehouse (Snowflake, Databricks):**
-
-```
-[0, 6, 7, 2, 3, 4, 5]
-Initial → Databases → Schemas → Artifacts → Columns → Ingest → Final
-```
+1. Select database
+2. Select schema
+3. Select tables (artifacts)
+4. Select columns (optional)
+5. Configure ingestion options
+6. Set schedule and cluster size
 
 **API Connectors:**
+1. Configure API endpoint
+2. Set authentication
+3. Configure request/response
+4. Configure ingestion options
+5. Set schedule and cluster size
 
+### Discovery Commands Reference
+
+```bash
+# View connector workflow requirements
+databasin connectors config <type> --screens
+
+# List all connector configurations
+databasin connectors config --all
+
+# Get specific connector details
+databasin connectors get <connectorId>
+
+# List connectors in project
+databasin connectors list --project <projectId> --full
+
+# View created pipelines
+databasin pipelines list --project <projectId>
+
+# Get pipeline details
+databasin pipelines get <pipelineId>
+
+# Execute pipeline
+databasin pipelines run <pipelineId>
 ```
-[0, 10, 4, 5]
-Initial → API Config → Ingest → Final
+
+## Complete Configuration Example
+
+Here's a comprehensive pipeline configuration showing all available options:
+
+```json
+{
+  "pipelineName": "Complete Pipeline Example",
+  "sourceConnectorId": "mysql-prod-123",
+  "targetConnectorId": "snowflake-dw-456",
+  "ingestionPattern": "data warehouse",
+  "targetCatalogName": "analytics",
+  "targetSchemaName": "staging",
+  "createCatalogs": false,
+  "sourceNamingConvention": true,
+  "isPrivate": 0,
+  "jobDetails": {
+    "tags": ["production", "hourly", "critical"],
+    "jobClusterSize": "L",
+    "emailNotifications": [
+      "data-team@example.com",
+      "ops@example.com"
+    ],
+    "jobRunSchedule": "0 * * * *",
+    "jobRunTimeZone": "America/New_York",
+    "jobTimeout": "7200"
+  },
+  "items": [
+    {
+      "sourceConnectionID": "mysql-prod-123",
+      "targetConnectionID": "snowflake-dw-456",
+      "sourceDatabaseName": "production",
+      "sourceSchemaName": "public",
+      "sourceTableName": "user_events",
+      "sourceColumnNames": [
+        "event_id",
+        "user_id",
+        "event_type",
+        "event_timestamp",
+        "metadata"
+      ],
+      "targetDatabaseName": "analytics",
+      "targetSchemaName": "staging",
+      "targetTableName": "user_events",
+      "ingestionType": "delta",
+      "watermarkColumnName": ["event_timestamp"],
+      "mergeColumns": ["event_id"],
+      "backloadNumDays": 3,
+      "snapshotRetentionPeriod": 0,
+      "detectDeletes": false,
+      "autoExplode": true
+    }
+  ]
+}
 ```
 
----
+## Next Steps
 
-## File References
+1. **Review connector documentation** - `databasin connectors config <type> --screens`
+2. **Test connector connections** - `databasin connectors test <connectorId>`
+3. **Create test pipeline** - Use interactive mode or simple JSON file
+4. **Monitor execution** - Check pipeline status after creation
+5. **Iterate and optimize** - Adjust cluster size and schedule as needed
 
-- **Wizard ViewModel**: `src/lib/pipelines/PipelineCreationWizardViewModel.svelte.js`
-- **Base ViewModel**: `src/lib/pipelines/ArtifactWizardViewModelBase.svelte.js`
-- **API Client**: `src/lib/pipelines/PipelinesApiClient.js`
-- **Initial Screen**: `src/lib/pipelines/screens/InitialScreen.svelte`
-- **Artifacts Screen**: `src/lib/pipelines/screens/ArtifactsScreen.svelte`
-- **Columns Screen**: `src/lib/pipelines/screens/ColumnsScreen.svelte`
-- **Final Screen**: `src/lib/pipelines/screens/FinalConfigurationScreen.svelte`
+For detailed CLI command reference, see:
+- [Pipelines Commands Guide](../../../databasin-cli/docs/pipelines-guide.md)
+- [Connectors Commands Guide](../../../databasin-cli/docs/connectors-guide.md)
