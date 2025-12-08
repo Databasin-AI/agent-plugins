@@ -1,8 +1,10 @@
-# Databasin CLI Expert Skill for Claude Code
+# DataBasin CLI Expert Skill for Claude Code (General Purpose)
 
-A comprehensive Claude Code skill that makes Claude an expert at using the Databasin CLI tool for data engineering, data science, data administration, and data visualization workflows.
+A comprehensive, general-purpose Claude Code skill that makes Claude an expert at using the DataBasin CLI tool for data engineering, data science, data administration, data visualization workflows, and documentation access.
 
 ## What This Skill Does
+
+**This is a general-purpose DataBasin CLI skill** that serves as both a primary skill and a fallback when more specific DataBasin skills are not available or unsuccessful.
 
 This skill empowers Claude to:
 
@@ -13,27 +15,23 @@ This skill empowers Claude to:
 - **Troubleshoot Failures:** Analyze logs, diagnose issues, and provide solutions
 - **Execute Automations:** Manage complex data workflows and business logic
 - **Assist with Data Discovery:** Help users find the data they need by querying metadata and sampling data
+- **Access DataBasin Documentation:** Fetch, index, and search DataBasin documentation efficiently using built-in scripts
 
 ## Installation
 
 ### For Claude Code Users
 
-1. **Copy this skill to your Claude Code skills directory:**
+1. **This skill is bundled with the DataBasin CLI Plugin:**
    ```bash
-   # If you're using user skills
-   cp -r databasin-cli-skill ~/.claude/skills/user/databasin-cli
-   
-   # Or if you have a custom skills location
-   cp -r databasin-cli-skill /path/to/your/skills/databasin-cli
+   # The skill is already available if you have the plugin installed
+   # Located at: .claude-plugin/databasin/skills/databasin-cli-skill/
    ```
 
-2. **Restart Claude Code or reload skills** (if applicable)
-
-3. **The skill will activate automatically** when you mention Databasin CLI operations
+2. **The skill activates automatically** when you mention DataBasin CLI operations or documentation
 
 ### Prerequisites
 
-You'll need the Databasin CLI installed:
+You'll need the DataBasin CLI installed:
 
 ```bash
 # Quick install
@@ -43,6 +41,13 @@ curl -fsSL https://raw.githubusercontent.com/Databasin-AI/databasin-cli/main/ins
 curl -fsSL https://raw.githubusercontent.com/Databasin-AI/databasin-cli/main/install.sh -o install.sh
 chmod +x install.sh
 ./install.sh
+```
+
+You'll also need Bun for documentation management scripts:
+
+```bash
+# Install Bun (https://bun.sh)
+curl -fsSL https://bun.sh/install | bash
 ```
 
 ## Usage Examples
@@ -98,16 +103,33 @@ Claude with this skill will:
 6. Offer to export to CSV if needed
 ```
 
+### Example 5: Documentation Access
+```
+You: "How do I configure OAuth for a Salesforce connector?"
+
+Claude with this skill will:
+1. Check the documentation index for OAuth and Salesforce topics
+2. Locate the relevant documentation section with file:line reference
+3. Provide specific guidance from the documentation
+4. Offer to show additional related sections if needed
+```
+
 ## Key Features
 
 ### 🎯 Comprehensive CLI Coverage
 - All authentication operations
 - Project management
-- Connector CRUD operations
+- Connector CRUD operations (250+ types)
 - SQL interface and data exploration
 - Pipeline creation, execution, and monitoring
 - Automation management
-- Generic API access
+- Documentation access and indexing
+
+### 📚 Advanced Documentation Management
+- Fetch latest documentation from GitHub using `databasin docs` commands
+- Build searchable indexes with categorization and line numbers
+- Low-token documentation lookups for faster, more efficient responses
+- Automatic categorization by module (Flowbasin, Lakebasin, Reportbasin, etc.)
 
 ### 🔍 Intelligent Data Discovery
 - Systematic exploration of data hierarchy
@@ -120,26 +142,31 @@ Claude with this skill will:
 - Common error pattern recognition
 - Systematic diagnostic workflows
 - Debug mode guidance
+- Bundled troubleshooting reference guide
 
 ### 📊 Multiple Output Formats
 - Table format for viewing
 - JSON for scripting/automation
 - CSV for data exports
-- Field filtering
+- Field filtering for token efficiency
 
 ### 🚀 Best Practices Built-In
 - Authentication verification
 - Incremental testing approaches
 - Security-conscious configurations
 - Performance optimization tips
+- Token-efficient command patterns
 
 ## What Makes This Skill Powerful
 
-1. **Context-Aware Assistance:** The skill knows when to use which commands based on the user's goal
-2. **Error Prevention:** Guides users through proper sequences (e.g., always authenticate first)
-3. **Troubleshooting Expertise:** Systematic approaches to diagnosing and fixing issues
-4. **Natural Language Processing:** Translates plain English data requests into SQL
-5. **Complete Workflow Coverage:** From initial setup through ongoing maintenance
+1. **General-Purpose Coverage:** Handles all DataBasin CLI operations and serves as a fallback skill
+2. **Context-Aware Assistance:** The skill knows when to use which commands based on the user's goal
+3. **Error Prevention:** Guides users through proper sequences (e.g., always authenticate first)
+4. **Troubleshooting Expertise:** Systematic approaches to diagnosing and fixing issues
+5. **Natural Language Processing:** Translates plain English data requests into SQL
+6. **Complete Workflow Coverage:** From initial setup through ongoing maintenance
+7. **Documentation Integration:** Seamless access to indexed documentation for guidance
+8. **Low-Token Efficiency:** Index-first approach for documentation and token-efficient CLI commands
 
 ## Supported Operations
 
@@ -169,6 +196,69 @@ Claude with this skill will:
 - Export to CSV/JSON
 - Batch operations
 
+### Documentation
+- Fetch from GitHub using `databasin docs`
+- Build searchable indexes
+- Low-token lookups
+- Categorized navigation
+
+## Documentation Management
+
+This skill includes powerful documentation management capabilities:
+
+### Fetch Latest Documentation
+
+```bash
+# Fetch all available DataBasin documentation
+bun scripts/fetch-docs.ts
+
+# Custom output location
+bun scripts/fetch-docs.ts /path/to/custom/output
+```
+
+This fetches:
+- All available documentation from `databasin docs`
+- Individual documents using `databasin docs [name]`
+- Saves to `references/databasin-docs/`
+- Creates an index at `references/databasin-docs/00-documentation-index.md`
+
+### Build Searchable Index
+
+```bash
+# Build consolidated index with categorization
+bun scripts/build-index.ts
+
+# Custom paths
+bun scripts/build-index.ts /path/to/docs /path/to/output/index.md
+```
+
+This creates:
+- Categorized table of contents
+- File locations with line numbers
+- Brief content previews
+- Fast keyword-based navigation
+
+### Use Documentation Efficiently
+
+```bash
+# List available documentation
+databasin docs
+
+# View specific guide
+databasin docs quickstart
+databasin docs pipelines-guide
+
+# Or use the indexed search
+# 1. Read references/documentation-index.md
+# 2. Find relevant topic and file:line location
+# 3. Read only that specific section
+```
+
+**Benefits:**
+- **Low token usage** - Read index first, then targeted sections
+- **Fast lookups** - Categories and line numbers for quick navigation
+- **Always current** - Refresh anytime with fetch-docs script
+
 ## Tips for Best Results
 
 1. **Be Specific:** "Find customer emails from New York who ordered last month" is better than "get customer data"
@@ -180,6 +270,8 @@ Claude with this skill will:
 4. **Ask for Explanations:** "Explain this SQL query" - Claude will break down what each part does
 
 5. **Request Validation:** "Check if this pipeline configuration is correct" - Claude will review it
+
+6. **Reference Documentation:** "Check the docs about connector OAuth" - Claude will search efficiently
 
 ## Common Workflows Supported
 
@@ -193,6 +285,44 @@ Claude with this skill will:
 - ✅ Exporting data for analysis
 - ✅ Scheduling automated workflows
 - ✅ Managing user permissions
+- ✅ Accessing and searching DataBasin documentation
+- ✅ Fetching latest documentation updates
+
+## Directory Structure
+
+```
+databasin-cli-skill/
+├── SKILL.md                    # Skill definition and comprehensive guide
+├── README.md                   # This file
+├── scripts/
+│   ├── fetch-docs.ts          # Fetch documentation from databasin docs
+│   └── build-index.ts         # Build searchable documentation index
+└── references/
+    ├── advanced-workflows.md  # Complex data engineering patterns
+    ├── example-queries.md     # SQL query examples
+    ├── troubleshooting.md     # Troubleshooting workflows
+    ├── token-efficiency.md    # Token optimization guide
+    └── databasin-docs/        # Fetched documentation (created by scripts)
+        ├── 00-documentation-index.md
+        └── *.md               # Individual documentation files
+```
+
+## Maintenance
+
+### Updating Documentation
+
+Keep documentation fresh by periodically running:
+
+```bash
+# Fetch latest documentation
+cd .claude-plugin/databasin/skills/databasin-cli-skill
+bun scripts/fetch-docs.ts
+
+# Rebuild the index
+bun scripts/build-index.ts
+```
+
+This ensures you always have access to the latest DataBasin documentation and guides.
 
 ## Contributing
 
@@ -201,17 +331,19 @@ Found an issue or have suggestions? This skill can be extended with:
 - More SQL translation examples
 - Pipeline template library
 - Connector-specific best practices
+- Enhanced documentation categorization
 
 ## Resources
 
-- [Databasin CLI Repository](https://github.com/Databasin-AI/databasin-cli)
-- [Databasin Platform](https://databasin.ai)
+- [DataBasin CLI Repository](https://github.com/Databasin-AI/databasin-cli)
+- [DataBasin Platform](https://databasin.ai)
 - [CLI Documentation](https://github.com/Databasin-AI/databasin-cli/blob/main/README.md)
+- [Bun Runtime](https://bun.sh)
 
 ## License
 
-This skill follows the same license as the Databasin CLI tool (CC-BY-4.0).
+This skill follows the same license as the DataBasin CLI tool (CC-BY-4.0).
 
 ---
 
-**Built for Claude Code users who work with data pipelines, connectors, and SQL workflows on the Databasin platform.**
+**Built for Claude Code users who work with data pipelines, connectors, SQL workflows, and need comprehensive DataBasin CLI expertise with integrated documentation access. This is a general-purpose skill that serves as both a primary skill and fallback when more specific DataBasin skills are not available or unsuccessful.**

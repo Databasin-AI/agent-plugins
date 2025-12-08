@@ -1,15 +1,15 @@
 ---
 name: databasin-cli
-description: Expert skill for using the Databasin CLI tool to manage data connectors, pipelines, automations, SQL queries, and comprehensive data engineering workflows. This skill should be used when users need help with creating/managing data connectors (250+ types), building ETL/ELT pipelines, executing SQL queries, exploring database structures, troubleshooting pipeline failures, managing Databasin projects, or any data engineering/administration task using Databasin.
+description: General-purpose expert skill for using the Databasin CLI tool to assist with CLI usage, documentation access, and and advanced databasin command usage. Use when users or agents need help with Databasin CLI operations, accessing documentation, troubleshooting failures, or when more specific Databasin skills are not available or unsuccessful.
 ---
 
-# Databasin CLI Expert
+# Databasin CLI Expert (General Purpose)
 
-Expert skill for using the Databasin CLI tool to manage data connectors, pipelines, automations, SQL queries, and comprehensive data engineering workflows on the Databasin platform.
+General-purpose expert skill for using the Databasin CLI tool to manage data connectors, pipelines, automations, SQL queries, documentation access, and comprehensive data engineering workflows on the Databasin platform.
 
 ## When to use this skill
 
-Use this skill when users need help with:
+**This is a general-purpose Databasin CLI skill.** Use this skill when users need help with:
 - Creating, managing, or troubleshooting data connectors (250+ types available)
 - Building and running data pipelines for ETL/ELT workflows
 - Executing SQL queries and exploring database structures
@@ -17,7 +17,10 @@ Use this skill when users need help with:
 - Finding specific data using natural language descriptions
 - Troubleshooting pipeline failures by analyzing logs
 - Managing Databasin projects, users, and permissions
+- **Accessing and searching Databasin documentation efficiently**
+- **Fetching and indexing documentation from GitHub**
 - Any data engineering, data science, data administration, or data visualization task using Databasin
+- **When more specific Databasin skills are not available or unsuccessful** (fallback skill)
 
 ## Core CLI Capabilities
 
@@ -26,7 +29,7 @@ The Databasin CLI (`databasin`) provides comprehensive data platform management:
 ### Authentication
 ```bash
 databasin auth login      # Login via browser (always required first)
-databasin auth whoami     # View current user
+databasin auth whoami     # View current user, and their projects and organizations
 databasin auth verify     # Check token validity
 ```
 
@@ -88,7 +91,7 @@ databasin automations history <automation-id>          # View execution history
 databasin automations tasks                            # Manage automation tasks
 ```
 
-### Documentation Access
+### Documentation Access (CRITICAL FEATURE)
 ```bash
 databasin docs                                         # List all available documentation
 databasin docs quickstart                              # View quickstart guide
@@ -97,6 +100,11 @@ databasin docs pipelines-guide                         # View pipelines guide
 databasin docs automations-guide                       # View automations guide
 databasin docs <name> --pretty                         # View with rich formatting
 ```
+
+**This skill includes scripts to fetch, index, and search documentation efficiently:**
+- Fetch latest docs from GitHub using `databasin docs` commands
+- Build searchable indexes with categorization and line numbers
+- Low-token documentation lookups for faster responses
 
 ### Shell Completion
 ```bash
@@ -199,6 +207,129 @@ databasin pipelines create pipeline.json -p <project-id>
 databasin pipelines run <pipeline-id>
 databasin pipelines logs <pipeline-id>
 ```
+
+### 5. Documentation Lookup Workflow (EFFICIENT REFERENCE)
+
+When users need documentation or guidance:
+
+```bash
+# Step 1: Check what documentation is available
+databasin docs
+
+# Step 2: View specific documentation
+databasin docs <name>
+
+# Step 3: For indexed documentation (if available)
+# Read references/documentation-index.md for quick lookups
+# Then read the specific file section as needed
+```
+
+## Documentation Management
+
+This skill provides powerful documentation management capabilities for efficient, low-token lookups.
+
+### 1. Fetch Latest Documentation
+
+Retrieve the most current Databasin documentation directly from GitHub.
+
+**When to use:**
+- Setting up documentation for the first time
+- Updating to the latest documentation version
+- After significant documentation changes in the repository
+
+**How to fetch:**
+
+```bash
+bun scripts/fetch-docs.ts
+```
+
+This command:
+- Executes `databasin docs` to get the list of available documentation
+- Fetches each individual document using `databasin docs [name]`
+- Saves all documentation to `references/databasin-docs/`
+- Creates a documentation index file at `references/databasin-docs/00-documentation-index.md`
+
+**Custom output location:**
+
+```bash
+bun scripts/fetch-docs.ts /path/to/custom/output
+```
+
+### 2. Build Searchable Index
+
+Generate a consolidated index from fetched documentation with categorization, line numbers, and descriptions.
+
+**When to use:**
+- After fetching documentation for the first time
+- After documentation updates
+- When the index needs to be regenerated
+
+**How to build:**
+
+```bash
+bun scripts/build-index.ts
+```
+
+This command:
+- Scans all markdown files in `references/databasin-docs/`
+- Extracts headers and their line numbers
+- Categorizes content by module (Flowbasin, Lakebasin, Reportbasin, etc.)
+- Generates a consolidated index at `references/documentation-index.md`
+
+**Custom paths:**
+
+```bash
+bun scripts/build-index.ts /path/to/docs /path/to/output/index.md
+```
+
+**Index structure:**
+
+The generated index includes:
+- **Table of Contents** - Quick navigation to each category
+- **Categorized sections** - Organized by module/topic (Flowbasin, Lakebasin, API, Frontend, Backend, etc.)
+- **File locations** - Relative paths with line numbers (e.g., `docs/api-guide.md:42`)
+- **Descriptions** - Brief content previews for context
+
+### 3. Search Documentation Efficiently
+
+Use the index for low-token documentation lookups.
+
+**Workflow:**
+
+1. **Search the index first** - Read `references/documentation-index.md` to find relevant topics
+2. **Identify file location** - Note the file path and line number from index entry
+3. **Read specific section** - Use the Read tool with the file path and line number to load only the relevant content
+
+**Example search pattern:**
+
+```
+User asks: "How do Flowbasin pipelines handle errors?"
+
+1. Read references/documentation-index.md
+2. Search for "pipeline" or "error" in the Flowbasin category
+3. Find entry: "Pipeline Error Handling (flowbasin-architecture.md:156)"
+4. Read references/databasin-docs/flowbasin-architecture.md starting at line 156
+```
+
+**Benefits:**
+- Minimal token usage - load only the index first
+- Targeted reading - fetch only relevant documentation sections
+- Fast lookups - categories and line numbers enable quick navigation
+
+### Documentation Categories
+
+The index organizes content into these categories:
+
+- **Flowbasin** - Pipeline management, data integration, connectors
+- **Lakebasin** - SQL queries, Trino connections, query execution
+- **Reportbasin** - AI reporting, LLM integration, report generation
+- **API** - API endpoints, request/response patterns, authentication
+- **Frontend** - Svelte components, ViewModels, UI patterns
+- **Backend** - Scala services, controllers, business logic
+- **Connectors** - Data source integrations, OAuth flows
+- **Authentication** - Auth flows, token management, security
+- **Configuration** - Setup, environment variables, deployment
+- **General** - Uncategorized documentation
 
 ## Natural Language to SQL Translation
 
@@ -346,6 +477,12 @@ Databasin supports 250+ prebuilt connectors:
 - **Validate results:** Sample output before exporting large datasets
 - **Optimize:** Use appropriate LIMIT, indexes, filters
 
+### 5. When Accessing Documentation
+- **Use indexed search first:** Check documentation-index.md before fetching full docs
+- **Fetch targeted sections:** Read only the specific file:line needed
+- **Update as needed:** Refresh documentation when Databasin updates
+- **Provide context:** Include file locations when referencing docs
+
 ## Environment Variables
 
 ```bash
@@ -483,6 +620,63 @@ The skill includes comprehensive reference documentation in the `references/` di
 - Batch operations with minimal token usage
 - Advanced patterns for incremental data fetching
 
+## Scripts Directory
+
+### scripts/fetch-docs.ts
+TypeScript/Bun script that fetches documentation using `databasin docs` commands:
+- Lists all available documentation
+- Fetches each document individually
+- Saves to `references/databasin-docs/`
+- Creates documentation index
+
+### scripts/build-index.ts
+TypeScript/Bun script that builds the consolidated searchable index:
+- Scans all markdown files in documentation directory
+- Extracts headers with line numbers
+- Categorizes by module/topic
+- Generates `references/documentation-index.md`
+
+## Typical Workflow Examples
+
+### Initial Setup with Documentation
+1. Fetch documentation from GitHub:
+   ```bash
+   bun scripts/fetch-docs.ts
+   ```
+
+2. Build the searchable index:
+   ```bash
+   bun scripts/build-index.ts
+   ```
+
+3. Reference available at `references/documentation-index.md`
+
+### Regular Usage
+1. When a documentation question arises, read the index:
+   ```
+   Read references/documentation-index.md
+   ```
+
+2. Search for relevant keywords in the category structure
+
+3. Locate the file path and line number from the index entry
+
+4. Read the specific documentation section:
+   ```
+   Read references/databasin-docs/[file-name].md (starting at line X)
+   ```
+
+### Updating Documentation
+1. Re-fetch latest documentation:
+   ```bash
+   bun scripts/fetch-docs.ts
+   ```
+
+2. Rebuild the index:
+   ```bash
+   bun scripts/build-index.ts
+   ```
+
 ## Summary
 
 The Databasin CLI is your comprehensive tool for:
@@ -492,6 +686,7 @@ The Databasin CLI is your comprehensive tool for:
 - **Automation:** Execute complex business logic and orchestration
 - **Troubleshooting:** Detailed logs and debug capabilities
 - **Data Administration:** Manage projects, permissions, and infrastructure
+- **Documentation Access:** Fetch, index, and search Databasin documentation efficiently
 
 **Golden Rules:**
 1. Always authenticate first: `databasin auth login`
@@ -499,5 +694,7 @@ The Databasin CLI is your comprehensive tool for:
 3. Always explore before querying: catalogs → schemas → tables → sample
 4. Always test connectors individually before building pipelines
 5. Always use appropriate output format: --json for scripts, --csv for exports, table for viewing
+6. Use indexed documentation search first: `references/documentation-index.md`
+7. Fetch targeted documentation sections: only read what you need
 
-To assist users effectively, leverage all Databasin CLI capabilities, translate their data needs into proper commands and SQL queries, troubleshoot issues systematically using the bundled troubleshooting guide, and guide them through building robust data workflows.
+To assist users effectively, leverage all Databasin CLI capabilities, translate their data needs into proper commands and SQL queries, troubleshoot issues systematically using the bundled troubleshooting guide, access documentation efficiently using the index, and guide them through building robust data workflows.
