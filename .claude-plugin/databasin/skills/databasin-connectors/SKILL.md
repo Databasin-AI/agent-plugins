@@ -14,10 +14,13 @@ Use this skill when the user requests help with:
 - **Creating new connectors** - "Create a MySQL connector for our production database"
 - **Modifying existing connectors** - "Update the credentials for connector 123"
 - **Testing connector connections** - "Test if the S3 connector is working"
+- **Inspecting connectors** (NEW) - "Show me everything about connector 5459" or "Analyze this Postgres connector"
 - **Deleting connectors** - "Remove the old Salesforce connector"
 - **Understanding connector types** - "What connector types are available?"
 - **Troubleshooting connection issues** - "Why can't my ADLS connector connect?"
 - **Exploring connector configurations** - "Show me what fields I need for a Snowflake connector"
+- **Finding pipeline usage** - "Which pipelines use this connector?"
+- **Viewing database structure** - "What tables are in this database connector?"
 
 ## Core Capabilities
 
@@ -26,9 +29,10 @@ This skill provides:
 1. **Connector Creation** - Create any of 434+ supported connector types with proper validation
 2. **Connector Management** - Update settings, credentials, and configuration
 3. **Connection Testing** - Verify connectors are properly configured
-4. **Connector Discovery** - List and explore available connector types
-5. **Configuration Validation** - Automatic validation during creation
-6. **OAuth Management** - Guide users through OAuth flows for cloud providers
+4. **Connector Inspection** (NEW) - Comprehensive analysis with connection testing, metadata, database structure, pipeline usage, and quick actions
+5. **Connector Discovery** - List and explore available connector types
+6. **Configuration Validation** - Automatic validation during creation
+7. **OAuth Management** - Guide users through OAuth flows for cloud providers
 
 ## Available Resources
 
@@ -41,10 +45,13 @@ All connector operations use the `databasin connectors` command suite:
 ```bash
 databasin connectors list -p <project> [--full] [--fields <fields>] [--json]
 databasin connectors get <id> [--json] [--fields <fields>]
+databasin connectors inspect <id-or-name>                              # Comprehensive connector analysis (NEW)
 databasin connectors create <file> -p <project>
 databasin connectors update <id> <file>
 databasin connectors delete <id> [--yes]
 databasin connectors test <id>
+databasin connectors config <subtype> [--screens]                      # Get connector configuration details
+databasin connectors config --all                                      # List all available connector types
 ```
 
 **Output Formats:**
@@ -386,7 +393,122 @@ Ready-to-use JSON templates:
    databasin connectors list -p proj-001 --full --csv > connectors.csv
    ```
 
-### G. OAuth Connector Setup
+### G. Inspecting Connectors (NEW - Comprehensive Analysis)
+
+**User Request:** "Show me everything about this connector" or "Analyze connector 5459"
+
+The `inspect` command provides comprehensive connector analysis in a single operation:
+- Connection testing
+- Metadata display
+- Configuration details (with sanitized sensitive data)
+- Database structure discovery (for SQL connectors)
+- Pipeline usage analysis
+- Quick action suggestions
+
+**Steps:**
+
+1. **Inspect by ID**
+
+   ```bash
+   databasin connectors inspect 5459
+   ```
+
+2. **Inspect by Name** (case-insensitive partial match)
+
+   ```bash
+   databasin connectors inspect "postgres"
+   databasin connectors inspect "Starling"
+   ```
+
+**Example Output:**
+
+```
+$ databasin connectors inspect 5459
+
+✔ Connector found
+✔ Connection successful
+
+Connector: StarlingPostgres (5459)
+Type: postgres
+Subtype: PostgreSQL
+Project ID: N1r8Do
+Created: 10/15/2024
+Status: Active
+
+Connection Details:
+  Host: postgres.example.com
+  Port: 5432
+  Database: production
+  SSL: Enabled
+
+Database Structure:
+  └─ postgres (database)
+      ├─ public (schema)
+      │   ├─ users
+      │   ├─ sessions
+      │   └─ orders
+      └─ config (schema)
+          ├─ settings
+          └─ audit_log
+
+Pipeline Usage:
+  Used in 3 pipeline(s):
+    • Daily User Sync (8901) - Source
+    • Weekly Orders Export (8902) - Source
+    • Session Analytics (8903) - Source
+
+Quick Actions:
+  $ databasin sql exec 5459 "SELECT * FROM users LIMIT 5"
+  $ databasin sql discover 5459
+  $ databasin pipelines create --source 5459
+  $ databasin connectors test 5459
+  $ databasin connectors update 5459
+```
+
+**Features:**
+
+1. **Connection Testing** - Automatically tests the connector
+2. **Metadata Display** - Shows ID, name, type, subtype, project, creation date
+3. **Configuration Details** - Displays connection settings with sensitive data masked
+4. **Database Structure** (SQL connectors only) - Shows databases, schemas, and tables
+5. **Pipeline Usage** - Lists all pipelines using this connector
+6. **Quick Actions** - Provides ready-to-use command suggestions
+
+**Supported SQL Connector Types:**
+- PostgreSQL, MySQL, MariaDB
+- SQL Server, Oracle
+- Snowflake, Databricks, Redshift
+- BigQuery, Trino, Presto
+- DB2, Sybase
+
+**Error Handling:**
+
+```bash
+# No connector found
+$ databasin connectors inspect nonexistent
+✖ No connector found matching "nonexistent"
+
+# Multiple matches
+$ databasin connectors inspect "postgres"
+✖ Multiple connectors found matching "postgres"
+
+Multiple matches found:
+  • Test Postgres 1 (5459)
+  • Test Postgres 2 (5460)
+
+Please specify a more specific name or use the connector ID
+```
+
+**When to Use:**
+- Quick overview of a connector's capabilities
+- Understanding database structure before querying
+- Finding which pipelines use a connector
+- Getting ready-to-use command examples
+- Troubleshooting connection issues with full context
+
+---
+
+### H. OAuth Connector Setup
 
 **User Request:** "I need to connect to Salesforce using OAuth"
 

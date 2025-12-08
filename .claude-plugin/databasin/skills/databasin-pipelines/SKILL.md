@@ -14,6 +14,7 @@ Assist users in creating and managing Databasin data pipelines through natural l
 Activate when users request:
 
 - Creating new data pipelines
+- Cloning existing pipelines (NEW) - duplicate pipelines with optional modifications
 - Modifying existing pipeline schedules, cluster sizes, or configurations
 - Adding or removing tables/files/artifacts from pipelines
 - Getting information about connectors or pipeline requirements
@@ -116,6 +117,149 @@ The CLI will display:
 - Pipeline name and status
 - Source and target connectors
 - Next steps (e.g., "Run with: databasin pipelines run <id>")
+
+---
+
+### 1B. Pipeline Cloning (NEW - Alternative to Creating from Scratch)
+
+**When to Clone Instead of Create:**
+
+- Promoting pipelines between environments (dev → staging → prod)
+- Creating test versions with different connectors
+- Generating schedule variations (hourly vs daily)
+- Backing up before major modifications
+
+**Step A: Identify Pipeline to Clone**
+
+```bash
+# List pipelines to find the one to clone
+databasin pipelines list --project <project_id>
+
+# Get details of the pipeline to clone
+databasin pipelines get <pipeline_id> --json
+```
+
+**Step B: Preview Clone (Optional but Recommended)**
+
+```bash
+# Dry-run to preview changes without creating
+databasin pipelines clone <pipeline_id> --dry-run
+
+# With modifications
+databasin pipelines clone <pipeline_id> \
+  --name "Dev Pipeline" \
+  --source <new-source-id> \
+  --target <new-target-id> \
+  --schedule "0 */6 * * *" \
+  --dry-run
+```
+
+**Step C: Clone Pipeline**
+
+```bash
+# Clone with default name (adds " (Clone)" suffix)
+databasin pipelines clone <pipeline_id>
+
+# Clone with customizations
+databasin pipelines clone <pipeline_id> \
+  --name "Production ETL" \
+  --source <prod-source-connector-id> \
+  --target <prod-target-connector-id> \
+  --schedule "0 2 * * *"
+```
+
+**Available Clone Options:**
+
+- `--name <name>` - Override pipeline name (default: original + " (Clone)")
+- `--source <id>` - Override source connector ID
+- `--target <id>` - Override target connector ID
+- `--schedule <cron>` - Override schedule (cron expression)
+- `--dry-run` - Preview changes without creating
+
+**Features:**
+
+1. **Smart Name Generation** - Automatically adds " (Clone)" if name not specified
+2. **Configuration Validation** - Validates connectors exist and schedule is valid
+3. **Connector Caching** - Efficient API usage when fetching connector details
+4. **Clear Diff Display** - Shows exactly what changed from original
+5. **Preserves Everything** - Artifacts, job details, all pipeline settings copied
+6. **Dry-Run Mode** - Preview before committing
+
+**Example Output:**
+
+```
+$ databasin pipelines clone 8901 --name "Production ETL" --dry-run
+
+✔ Source pipeline loaded: Daily User Sync (8901)
+✔ Configuration valid
+
+Changes:
+  ~ Name: "Daily User Sync" → "Production ETL"
+  ✓ Source: StarlingPostgres (5459) [unchanged]
+  ✓ Target: ITL TPI Databricks (5765) [unchanged]
+  ✓ Schedule: "0 2 * * *" [unchanged]
+  ✓ Artifacts: 2 items [unchanged]
+
+Preview: Pipeline would be cloned as follows
+
+Original:
+  Name: Daily User Sync
+  Source: StarlingPostgres (5459)
+  Target: ITL TPI Databricks (5765)
+  Schedule: 0 2 * * *
+  Artifacts: 2 items
+
+Cloned:
+  Name: Production ETL
+  Source: StarlingPostgres (5459)
+  Target: ITL TPI Databricks (5765)
+  Schedule: 0 2 * * *
+  Artifacts: 2 items
+
+✓ Dry run successful
+Use --confirm (or remove --dry-run) to create this pipeline
+```
+
+**Success Output (After Clone):**
+
+```
+✔ Pipeline created: 8905
+
+Next steps:
+  $ databasin pipelines run 8905    # Test the cloned pipeline
+  $ databasin pipelines logs 8905   # View execution logs
+```
+
+**Error Handling:**
+
+```bash
+# Pipeline not found
+$ databasin pipelines clone 99999
+✖ Failed to clone pipeline
+Error: Pipeline not found
+
+# Invalid connector ID
+$ databasin pipelines clone 8901 --source 99999
+✖ Configuration validation failed
+Errors:
+  ✖ sourceConnectorId: Connector 99999 not found or not accessible
+
+# Invalid cron expression
+$ databasin pipelines clone 8901 --schedule "invalid"
+✖ Configuration validation failed
+Errors:
+  ✖ schedule: Invalid cron expression: "invalid"
+  Expected format: "minute hour day month dayOfWeek" (e.g., "0 2 * * *")
+```
+
+**Use Cases:**
+
+1. **Environment Promotion** - Clone from dev to prod with different connectors
+2. **Testing** - Clone production pipeline for testing with test connectors
+3. **Schedule Variations** - Create hourly version of daily pipeline
+4. **Backup/Template** - Clone before major modifications
+
+---
 
 ### 2. Pipeline Modification
 
@@ -756,15 +900,17 @@ databasin connectors test conn-snow-002 --verbose
 
 ### Pipeline Commands
 
-| Command  | Description               | Example                                               |
-| -------- | ------------------------- | ----------------------------------------------------- |
-| `list`   | List pipelines in project | `databasin pipelines list -p myproject`               |
-| `get`    | Get pipeline details      | `databasin pipelines get 123`                         |
-| `create` | Create new pipeline       | `databasin pipelines create config.json -p myproject` |
-| `update` | Update pipeline           | `databasin pipelines update 123 update.json`          |
-| `delete` | Delete pipeline           | `databasin pipelines delete 123`                      |
-| `run`    | Execute pipeline          | `databasin pipelines run 123`                         |
-| `logs`   | View execution logs       | `databasin pipelines logs 123`                        |
+| Command   | Description                              | Example                                                          |
+| --------- | ---------------------------------------- | ---------------------------------------------------------------- |
+| `list`    | List pipelines in project                | `databasin pipelines list -p myproject`                          |
+| `get`     | Get pipeline details                     | `databasin pipelines get 123`                                    |
+| `create`  | Create new pipeline                      | `databasin pipelines create config.json -p myproject`            |
+| `clone`   | Clone existing pipeline (NEW)            | `databasin pipelines clone 123 --name "New Name"`                |
+| `update`  | Update pipeline                          | `databasin pipelines update 123 update.json`                     |
+| `delete`  | Delete pipeline                          | `databasin pipelines delete 123`                                 |
+| `run`     | Execute pipeline                         | `databasin pipelines run 123`                                    |
+| `logs`    | View execution logs                      | `databasin pipelines logs 123`                                   |
+| `history` | View execution history (NEW)             | `databasin pipelines history 123 --limit 10`                     |
 
 ### Artifact Commands
 

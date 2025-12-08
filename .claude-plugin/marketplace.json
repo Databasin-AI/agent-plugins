@@ -4,6 +4,7 @@
 		"name": "Databasin Tools",
 		"email": "tools@databasin.ai"
 	},
+	"version": "0.6.0",
 	"plugins": [
 		{
 			"name": "databasin",

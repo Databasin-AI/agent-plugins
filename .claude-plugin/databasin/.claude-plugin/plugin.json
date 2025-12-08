@@ -1,6 +1,6 @@
 {
 	"name": "databasin",
-	"version": "0.0.2",
+	"version": "0.6.0",
 	"description": "Databasin API integration plugin providing authenticated API access, JWT management, and specialized agents for working with Databasin projects, pipelines, connectors, and reports.",
 	"author": {
 		"name": "Databasin Team"

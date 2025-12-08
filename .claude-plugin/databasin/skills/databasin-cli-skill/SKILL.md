@@ -48,6 +48,7 @@ databasin connectors list                              # Count connectors (defau
 databasin connectors list --full                       # List all connector objects (use with caution)
 databasin connectors list --full --fields id,name,type --limit 20  # Token-efficient listing
 databasin connectors get <connector-id>                # Get connector details
+databasin connectors inspect <id-or-name>              # Comprehensive analysis (connection, metadata, structure, pipelines, quick actions)
 databasin connectors create <config.json>              # Create new connector
 databasin connectors update <id> <config.json>         # Update connector
 databasin connectors delete <connector-id>             # Delete connector
@@ -72,23 +73,37 @@ databasin pipelines template                           # Generate pipeline confi
 databasin pipelines list --project <project-id>        # List pipelines (project required)
 databasin pipelines get <pipeline-id>                  # Get pipeline details
 databasin pipelines create <config.json> -p <project>  # Create pipeline from file
+databasin pipelines clone <pipeline-id>                # Clone existing pipeline with optional overrides
+databasin pipelines clone <id> --name "New Name"       # Clone with custom name
+databasin pipelines clone <id> --source <conn-id>      # Clone with different source
+databasin pipelines clone <id> --target <conn-id>      # Clone with different target
+databasin pipelines clone <id> --schedule "0 3 * * *"  # Clone with different schedule
+databasin pipelines clone <id> --dry-run               # Preview changes without creating
 databasin pipelines run <pipeline-id>                  # Run pipeline
 databasin pipelines logs <pipeline-id>                 # View logs (critical for troubleshooting)
 databasin pipelines history <pipeline-id>              # View execution history
-databasin pipelines artifacts                          # Manage pipeline artifacts
+databasin pipelines history <id> --limit 10            # Recent 10 runs
+databasin pipelines history <id> --count               # Count total runs
+databasin pipelines artifacts logs <artifact-id>       # View artifact logs
+databasin pipelines artifacts history <artifact-id>    # View artifact execution history
 ```
 
 ### Automation Management
 ```bash
 databasin automations list                             # List automations
 databasin automations list --project <project-id>      # List by project
+databasin automations list --active                    # Filter to active automations
+databasin automations list --running                   # Filter to currently running automations
 databasin automations get <automation-id>              # Get details
 databasin automations create <config.json>             # Create automation
 databasin automations run <automation-id>              # Run automation
 databasin automations stop <automation-id>             # Stop running automation
 databasin automations logs <automation-id>             # View logs
+databasin automations logs <id> --run-id <run-id>      # View logs for specific run
 databasin automations history <automation-id>          # View execution history
-databasin automations tasks                            # Manage automation tasks
+databasin automations history <id> --limit 20          # Recent 20 runs
+databasin automations tasks logs <task-id>             # View task logs
+databasin automations tasks history <task-id>          # View task execution history
 ```
 
 ### Documentation Access (CRITICAL FEATURE)
@@ -145,19 +160,26 @@ databasin connectors list
 # Step 2: List connector details if needed (with token efficiency)
 databasin connectors list --full --fields connectorID,connectorName,connectorType --limit 20
 
+# Step 2a (NEW): Use inspect for comprehensive connector analysis
+# This command provides connection testing, metadata, configuration, database structure,
+# pipeline usage, and quick action suggestions in a single command
+databasin connectors inspect <id-or-name>
+# Example: databasin connectors inspect 5459
+# Example: databasin connectors inspect "postgres"
+
 # Step 3: Explore data hierarchy
 databasin sql catalogs <connector-id>
 databasin sql schemas <connector-id> --catalog <catalog>
 databasin sql tables <connector-id> --catalog <catalog> --schema <schema>
 
-# Step 3: Sample data to understand structure
+# Step 4: Sample data to understand structure
 databasin sql exec <connector-id> "SELECT * FROM <table> LIMIT 5"
 
-# Step 4: Craft query based on user's natural language request
+# Step 5: Craft query based on user's natural language request
 # Example: "customer emails from New York"
 databasin sql exec <connector-id> "SELECT email FROM customers WHERE state = 'NY'"
 
-# Step 5: Export if needed
+# Step 6: Export if needed
 databasin sql exec <connector-id> "<query>" --csv > results.csv
 ```
 
@@ -185,6 +207,8 @@ DATABASIN_DEBUG=true databasin pipelines run <pipeline-id>
 
 **IMPORTANT: Interactive wizards are not supported in AI agent workflows. Always use file-based configuration.**
 
+**Option A: Create from scratch**
+
 ```bash
 # Step 1: Verify source connector works
 databasin sql exec <source-id> "SELECT 1"
@@ -207,6 +231,37 @@ databasin pipelines create pipeline.json -p <project-id>
 databasin pipelines run <pipeline-id>
 databasin pipelines logs <pipeline-id>
 ```
+
+**Option B: Clone existing pipeline (NEW)**
+
+```bash
+# Step 1: Identify pipeline to clone
+databasin pipelines list --project <project-id>
+
+# Step 2: Preview clone (optional, recommended)
+databasin pipelines clone <pipeline-id> --dry-run
+
+# Step 3: Clone with optional modifications
+# Clone with default name (adds " (Clone)" suffix)
+databasin pipelines clone <pipeline-id>
+
+# Or clone with customizations:
+databasin pipelines clone <pipeline-id> \
+  --name "Dev Pipeline" \
+  --source <new-source-id> \
+  --target <new-target-id> \
+  --schedule "0 */6 * * *"
+
+# Step 4: Test the cloned pipeline
+databasin pipelines run <new-pipeline-id>
+databasin pipelines logs <new-pipeline-id>
+```
+
+**Use cases for cloning:**
+- Environment promotion (dev → staging → prod)
+- Testing with different connectors
+- Schedule variations (hourly vs daily)
+- Creating backups before major modifications
 
 ### 5. Documentation Lookup Workflow (EFFICIENT REFERENCE)
 
