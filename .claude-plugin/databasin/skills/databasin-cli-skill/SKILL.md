@@ -121,12 +121,6 @@ databasin docs <name> --pretty                         # View with rich formatti
 - Build searchable indexes with categorization and line numbers
 - Low-token documentation lookups for faster responses
 
-### Shell Completion
-```bash
-databasin completion install bash                      # Install bash completions
-databasin completion install zsh                       # Install zsh completions
-databasin completion install fish                      # Install fish completions
-```
 
 ### Output Formatting
 ```bash
