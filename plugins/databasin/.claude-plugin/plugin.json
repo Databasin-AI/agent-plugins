@@ -1,6 +1,6 @@
 {
 	"name": "databasin",
-	"version": "0.6.0",
+	"version": "0.7.0",
 	"description": "Databasin API integration plugin providing authenticated API access, JWT management, and specialized agents for working with Databasin projects, pipelines, connectors, and reports.",
 	"author": {
 		"name": "Databasin Team"
@@ -18,11 +18,12 @@
 		"trino",
 		"reporting"
 	],
-	"agents": ["./agents/reportbasin-report-builder.md"],
+	"agents": [
+		"./agents/databasin-pipeline-creator.md"
+	],
 	"commands": [
 		"./commands/create-connector.md",
 		"./commands/create-pipeline.md",
-		"./commands/create-report.md",
 		"./commands/list-connectors.md",
 		"./commands/list-projects.md"
 	],
@@ -30,6 +31,7 @@
 		"./skills/databasin-automations",
 		"./skills/databasin-cli-skill",
 		"./skills/databasin-connectors",
-		"./skills/databasin-pipelines"
+		"./skills/databasin-pipelines",
+		"./skills/databasin-query-assistant"
 	]
 }

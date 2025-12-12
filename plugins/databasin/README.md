@@ -2,11 +2,91 @@
 
 Complete plugin for Databasin CLI integration, providing authenticated access, pipeline management, connector configuration, and specialized agents for data engineering workflows.
 
+## Platform Overview
+
+**Databasin** is an enterprise data integration platform that provides three integrated modules for comprehensive data management:
+
+### Flowbasin - Data Integration & Pipeline Management
+The core data integration engine that connects to 250+ data sources and orchestrates ETL/ELT workflows.
+
+**Key capabilities:**
+- **Connector Management**: Create and configure connections to databases, cloud storage, SaaS applications, and streaming platforms
+- **Pipeline Orchestration**: Build, schedule, and monitor data pipelines for automated data movement
+- **Transformation Engine**: Apply data transformations, validations, and enrichments during pipeline execution
+- **Artifact Management**: Configure granular data artifacts within pipelines for complex workflows
+
+**Common use cases:**
+- Sync data from operational databases to analytics warehouses
+- Integrate CRM data (Salesforce, HubSpot) with internal systems
+- Consolidate data from multiple sources into a unified data lake
+- Automate recurring data exports and imports
+
+### Lakebasin - Interactive SQL Query Engine
+Direct SQL access to connected data sources using Trino-powered distributed query execution.
+
+**Key capabilities:**
+- **Schema Discovery**: Explore catalogs, schemas, and tables across all connected sources
+- **SQL Execution**: Run ad-hoc SQL queries against any connected database
+- **Direct Connections**: Optional browser-based direct connections to Trino clusters
+- **Data Exploration**: Sample data, validate schemas, and perform data quality checks
+
+**Common use cases:**
+- Explore unfamiliar databases to understand structure and content
+- Run ad-hoc queries for analysis without building pipelines
+- Validate data quality before and after pipeline executions
+- Perform schema comparisons between source and target systems
+
+### Reportbasin - AI-Powered Analytics & Reporting
+LLM-integrated reporting system that generates insights from your data.
+
+**Key capabilities:**
+- **Natural Language Queries**: Describe what you want to analyze in plain language
+- **Automated Data Collection**: AI gathers relevant data from connected sources
+- **Intelligent Analysis**: LLM-powered insights and pattern detection
+- **Report Generation**: Automated report creation with visualizations and recommendations
+
+**Common use cases:**
+- Generate executive summaries from complex datasets
+- Identify trends and anomalies automatically
+- Create recurring analytical reports
+- Answer business questions through natural language
+
+## Integration Architecture
+
+The Databasin CLI provides unified access to all three modules:
+
+```
+┌─────────────────────────────────────────────────────┐
+│              Databasin CLI                           │
+├─────────────────────────────────────────────────────┤
+│                                                       │
+│  ┌───────────────┐  ┌───────────────┐  ┌──────────┐│
+│  │  Flowbasin    │  │  Lakebasin    │  │ Reportbasin│
+│  │  Commands     │  │  Commands     │  │ Commands   │
+│  ├───────────────┤  ├───────────────┤  ├──────────┤│
+│  │ • connectors  │  │ • sql exec    │  │ • reports │ │
+│  │ • pipelines   │  │ • sql tables  │  │ • analyze │ │
+│  │ • automations │  │ • sql discover│  │ • insights│ │
+│  └───────────────┘  └───────────────┘  └──────────┘│
+│                                                       │
+├─────────────────────────────────────────────────────┤
+│            Authentication & Projects                  │
+│     • auth login  • auth whoami  • projects list    │
+└─────────────────────────────────────────────────────┘
+           │
+           ▼
+┌─────────────────────────────────────────────────────┐
+│        Databasin API (Backend Services)              │
+│   • REST API  • Authentication  • Module Guard       │
+└─────────────────────────────────────────────────────┘
+```
+
 ## Plugin Structure
 
 ```
 .claude-plugin/databasin/
 ├── plugin.json              # Plugin manifest
+├── LICENSE                  # CC-BY-4.0 License
 ├── commands/                 # Slash commands for common operations
 │   ├── list-projects.md
 │   ├── list-connectors.md
@@ -16,10 +96,16 @@ Complete plugin for Databasin CLI integration, providing authenticated access, p
 ├── agents/                   # Specialized subagents
 │   └── databasin-pipeline-creator.md
 ├── skills/                   # Expert skills
-│   ├── databasin-cli-skill/
-│   ├── databasin-connectors/
-│   ├── databasin-pipelines/
-│   └── databasin-automations/
+│   ├── databasin-cli-skill/       # General CLI expertise
+│   ├── databasin-connectors/      # Connector management
+│   ├── databasin-pipelines/       # Pipeline workflows
+│   ├── databasin-automations/     # Automation scheduling
+│   └── databasin-query-assistant/ # SQL query assistance
+├── examples/                 # Real-world workflow examples
+│   ├── README.md
+│   ├── postgres-to-snowflake-pipeline.md
+│   ├── troubleshooting-failed-pipeline.md
+│   └── connector-inspection-and-cloning.md
 └── README.md                 # This file
 ```
 
@@ -46,6 +132,42 @@ This plugin works with specialized skills in the `skills/` directory:
   - Scheduled task creation
   - Event-driven workflows
   - Automation monitoring
+
+## 🔑 Critical: Always Use Project Internal IDs
+
+**IMPORTANT:** Many Databasin CLI commands require a `--project` (or `-p`) argument. Always use the project's **internal ID (alphanumeric string)**, not the project name.
+
+### Finding Your Project ID
+
+```bash
+# Login first
+databasin auth login
+
+# View your projects with their internal IDs
+databasin auth whoami
+
+# Example output:
+# User: john.doe@company.com
+# Organizations:
+#   - Acme Corp (ID: 123)
+# Projects:
+#   - Production Data Warehouse (ID: N1r8Do)  ← Use this ID
+#   - Development Environment (ID: K9mPx2)    ← Or this ID
+```
+
+### Using Project IDs Correctly
+
+```bash
+# ✅ CORRECT - using internal ID
+databasin connectors list --project N1r8Do
+databasin pipelines create config.json --project N1r8Do
+databasin pipelines clone 8901 --project N1r8Do
+
+# ❌ WRONG - using project name (will fail)
+databasin connectors list --project "Production Data Warehouse"
+```
+
+**Why this matters:** The Databasin API uses internal IDs for all resource references. Project names can change, but IDs remain stable. Always reference projects by their ID for reliable automation.
 
 ## Quick Start
 
@@ -467,6 +589,229 @@ databasin pipelines template > pipeline.json
 # Edit pipeline.json
 databasin pipelines create pipeline.json -p <project-id>
 ```
+
+## 📚 Comprehensive Examples
+
+The `examples/` directory contains detailed, real-world workflow examples with step-by-step instructions:
+
+### [PostgreSQL to Snowflake Pipeline](./examples/postgres-to-snowflake-pipeline.md)
+Complete end-to-end workflow for building a production data pipeline.
+
+**Covers:**
+- Authentication and project ID discovery
+- Connector creation and testing
+- Source data exploration
+- Pipeline configuration and validation
+- Deployment and monitoring
+- Environment cloning strategies
+
+**Perfect for:** First-time users setting up their first pipeline
+
+---
+
+### [Troubleshooting Failed Pipelines](./examples/troubleshooting-failed-pipeline.md)
+Systematic approach to diagnosing and fixing pipeline failures.
+
+**Covers:**
+- Reading and interpreting logs
+- Common failure scenarios (schema changes, permissions, timeouts)
+- Testing fixes safely
+- Debug mode usage
+- Preventive monitoring
+
+**Perfect for:** Users experiencing pipeline issues or building monitoring automation
+
+---
+
+### [Connector Inspection and Pipeline Cloning](./examples/connector-inspection-and-cloning.md)
+Advanced techniques for connector analysis and rapid deployment.
+
+**Covers:**
+- Using `connectors inspect` for comprehensive analysis
+- Understanding database structure before building pipelines
+- Environment promotion workflows (dev → staging → prod)
+- Testing configuration variations
+- Creating pipeline backups
+
+**Perfect for:** Advanced users managing multiple environments or promoting tested pipelines
+
+---
+
+**See [examples/README.md](./examples/README.md) for a complete guide to all available examples.**
+
+## 🔧 Troubleshooting Guide
+
+### Authentication Issues
+
+**Problem:** "Authentication required" or "Token expired" errors
+
+**Solution:**
+```bash
+# Re-authenticate
+databasin auth login
+
+# Verify token validity
+databasin auth verify
+
+# Check current user context
+databasin auth whoami
+```
+
+---
+
+### Pipeline Failures
+
+**Problem:** Pipeline execution fails or shows errors
+
+**Solution:**
+```bash
+# Step 1: Always check logs FIRST
+databasin pipelines logs <pipeline-id>
+
+# Step 2: Review execution history
+databasin pipelines history <pipeline-id> --limit 10
+
+# Step 3: Test connectors individually
+databasin connectors test <source-connector-id>
+databasin connectors test <target-connector-id>
+
+# Step 4: Verify source query
+databasin sql exec <source-id> "SELECT 1"
+
+# Step 5: Enable debug mode for detailed diagnostics
+DATABASIN_DEBUG=true databasin pipelines run <pipeline-id>
+```
+
+---
+
+### Connector Connection Failures
+
+**Problem:** "Connection timeout" or "Connection refused" errors
+
+**Solution:**
+```bash
+# Test the connector
+databasin connectors test <connector-id>
+
+# Inspect comprehensive status
+databasin connectors inspect <connector-id>
+
+# Review connector configuration
+databasin connectors get <connector-id>
+
+# Common fixes:
+# 1. Verify credentials haven't expired
+# 2. Check network connectivity to host
+# 3. Ensure database/service is running
+# 4. Verify firewall rules allow access
+```
+
+---
+
+### "Resource Not Found" Errors
+
+**Problem:** "Connector not found" or "Pipeline not found" (404 errors)
+
+**Solution:**
+```bash
+# For connectors:
+databasin connectors list --project <project-id> --full --fields "connectorID,connectorName"
+
+# For pipelines:
+databasin pipelines list --project <project-id> --json | jq '.[] | {id: .pipelineID, name: .name}'
+
+# Ensure you're using the correct project ID:
+databasin auth whoami  # Check your project IDs
+```
+
+---
+
+### SQL Query Errors
+
+**Problem:** "Syntax error" or "Column does not exist" in queries
+
+**Solution:**
+```bash
+# Verify table structure
+databasin sql tables <connector-id> --catalog <cat> --schema <sch>
+
+# Check column names
+databasin sql exec <connector-id> "
+  SELECT column_name, data_type
+  FROM information_schema.columns
+  WHERE table_name = 'your_table'
+"
+
+# Test with simple query first
+databasin sql exec <connector-id> "SELECT 1"
+```
+
+---
+
+### Schedule Not Executing
+
+**Problem:** Pipeline configured to run on schedule, but not executing
+
+**Solution:**
+```bash
+# Check schedule configuration
+databasin pipelines get <id> --json | jq '.artifacts[0].schedule'
+
+# Verify schedule is enabled
+# Look for: "enabled": true
+
+# Check recent execution history
+databasin pipelines history <id> --limit 20
+
+# If enabled but not running:
+# 1. Verify cron expression is valid
+# 2. Check timezone setting
+# 3. Confirm pipeline isn't in error state
+# 4. Contact administrator if issue persists
+```
+
+---
+
+### Performance Issues
+
+**Problem:** Pipelines running slowly or timing out
+
+**Solution:**
+```bash
+# Check pipeline execution time trends
+databasin pipelines history <id> --json | jq '.[] | {run: .runID, duration: .duration, status: .status}'
+
+# Review logs for slow steps
+databasin pipelines logs <id> | grep -i "duration\|elapsed\|time"
+
+# Common performance fixes:
+# 1. Add WHERE clauses to limit data volume
+# 2. Use incremental loads instead of full refreshes
+# 3. Optimize source queries with proper indexes
+# 4. Consider parallel pipeline execution for large datasets
+```
+
+---
+
+### Getting More Help
+
+1. **Enable Debug Mode:**
+   ```bash
+   DATABASIN_DEBUG=true databasin <command>
+   ```
+
+2. **Check CLI Documentation:**
+   ```bash
+   databasin docs troubleshooting
+   databasin <command> --help
+   ```
+
+3. **Use Skills for Guided Assistance:**
+   - `@skill-databasin-cli` - General CLI help
+   - Review `skills/*/references/troubleshooting.md` files
+
+4. **Consult Examples:**
+   - See `examples/troubleshooting-failed-pipeline.md` for detailed troubleshooting workflows
 
 ## Support
 

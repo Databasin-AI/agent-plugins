@@ -22,6 +22,18 @@ General-purpose expert skill for using the Databasin CLI tool to manage data con
 - Any data engineering, data science, data administration, or data visualization task using Databasin
 - **When more specific Databasin skills are not available or unsuccessful** (fallback skill)
 
+## 📚 Real-World Examples
+
+For comprehensive, step-by-step workflow examples, see the plugin's `examples/` directory:
+
+- **[PostgreSQL to Snowflake Pipeline](../../examples/postgres-to-snowflake-pipeline.md)** - Complete end-to-end workflow for building a production data pipeline with authentication, connector setup, data exploration, pipeline creation, and monitoring
+- **[Troubleshooting Failed Pipelines](../../examples/troubleshooting-failed-pipeline.md)** - Systematic approach to diagnosing and fixing pipeline failures including log analysis, common scenarios, and preventive monitoring
+- **[Connector Inspection and Cloning](../../examples/connector-inspection-and-cloning.md)** - Advanced techniques using `connectors inspect` and `pipelines clone` for environment promotion and rapid deployment
+
+**See [../../examples/README.md](../../examples/README.md) for a complete guide to all available examples and common patterns.**
+
+**CRITICAL REMINDER:** Always use project internal IDs (alphanumeric strings like "N1r8Do") with `--project` arguments, never project names. Find your project ID with `databasin auth whoami`.
+
 ## Core CLI Capabilities
 
 The Databasin CLI (`databasin`) provides comprehensive data platform management:

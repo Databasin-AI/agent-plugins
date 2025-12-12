@@ -4,11 +4,11 @@
 		"name": "Databasin Tools",
 		"email": "tools@databasin.ai"
 	},
-	"version": "0.6.0",
+	"version": "0.7.0",
 	"plugins": [
 		{
 			"name": "databasin",
-			"source": "./.claude-plugin/databasin",
+			"source": "./.plugins/databasin",
 			"description": "Provides a variety of tools to interact with Databasin platform, including querying datasets, managing data pipelines, and accessing metadata.",			
 			"author": {
 				"name": "Databasin Team"
