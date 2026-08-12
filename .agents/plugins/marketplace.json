@@ -1,0 +1,20 @@
+{
+  "name": "databasin-tools",
+  "interface": {
+    "displayName": "Databasin Tools"
+  },
+  "plugins": [
+    {
+      "name": "databasin",
+      "source": {
+        "source": "local",
+        "path": "./plugins/databasin"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

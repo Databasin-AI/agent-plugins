@@ -1,7 +1,7 @@
 {
 	"name": "databasin",
-	"version": "0.7.0",
-	"description": "Databasin API integration plugin providing authenticated API access, JWT management, and specialized agents for working with Databasin projects, pipelines, connectors, and reports.",
+	"version": "0.8.0",
+	"description": "Databasin skills for data discovery, schema exploration, SQL planning, and data engineering workflows in Claude Code.",
 	"author": {
 		"name": "Databasin Team"
 	},
@@ -9,9 +9,8 @@
 	"license": "CC-BY-4.0",
 	"keywords": [
 		"databasin",
-		"api",
-		"jwt",
-		"authentication",
+		"mcp",
+		"data-discovery",
 		"data-integration",
 		"pipelines",
 		"connectors",

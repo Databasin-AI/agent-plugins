@@ -174,7 +174,7 @@ Databasin supports 22 different authentication methods across various connector 
 {
 	"connectorName": "GitHub API",
 	"connectorAuthType": 6,
-	"connectorPassword": "ghp_1234567890abcdefghijklmnop"
+	"connectorPassword": "<github-personal-access-token>"
 }
 ```
 

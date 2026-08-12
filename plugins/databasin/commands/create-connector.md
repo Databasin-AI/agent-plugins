@@ -1,27 +1,11 @@
 ---
-description: Create and test a Databasin connector with guided configuration
+description: Inspect Databasin connector context and draft a redacted connector proposal
 ---
 
-# Create Databasin Connector
+# Plan Databasin Connector
 
-Use the @databasin-connectors skill to guide the user through creating a new data connector with proper validation and testing.
+Use the `databasin-connectors` skill. This command is inspect-and-plan only: the current MCP cannot create, update, test, or delete connectors.
 
-The skill will handle:
-- Selecting connector category (RDBMS, File & API, CRM/ERP, etc.)
-- Choosing specific connector type (MySQL, PostgreSQL, S3, Salesforce, etc.)
-- Gathering required and optional configuration fields
-- Validating field values against connector schemas
-- Creating the connector via Databasin CLI
-- Testing the connection automatically
-- Troubleshooting connection failures and offering configuration updates
+Use `databasin_get_context`, `databasin_search`, `databasin_describe_resource`, and, when relevant, `databasin_browse_schema` to gather current non-secret context. `databasin_describe_resource` may report `CAPABILITY_UNAVAILABLE`; do not bypass that boundary. Do not invoke a shell or CLI, request credentials, write configuration files, or claim that a connector was created or tested.
 
-The skill provides access to 121+ supported connector types with comprehensive configuration templates and field definitions.
-
-## Required Context
-- **project_id**: Databasin project ID (skill will prompt if not available)
-
-## Output
-- Connector ID of created connector
-- Connection test results
-- Location of saved JSON configuration file(s)
-- Next steps for using the connector in pipelines
+Return a redacted proposal with the selected project, connector type, non-secret fields, dependencies, unresolved secret references, risks, and validation checks. State that capability is unavailable. Any future mutation requires validation, explicit user approval, and an idempotency key or stable plan hash.

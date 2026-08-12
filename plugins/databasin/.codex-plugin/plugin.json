@@ -1,0 +1,36 @@
+{
+  "name": "databasin",
+  "version": "0.8.0",
+  "description": "Databasin skills for data discovery, schema exploration, SQL planning, and data engineering workflows in Codex.",
+  "author": {
+    "name": "Databasin Team"
+  },
+  "homepage": "https://databasin.ai",
+  "license": "CC-BY-4.0",
+  "keywords": [
+    "databasin",
+    "data discovery",
+    "schema",
+    "sql",
+    "data engineering"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Databasin",
+    "shortDescription": "Explore Databasin data and plan SQL workflows.",
+    "longDescription": "Use Databasin skills to discover resources, browse schemas, understand table semantics, profile data, validate SQL plans, and manage asynchronous query operations.",
+    "developerName": "Databasin Team",
+    "category": "Productivity",
+    "capabilities": [
+      "Data discovery",
+      "Schema exploration",
+      "SQL planning",
+      "SQL execution"
+    ],
+    "defaultPrompt": [
+      "Help me explore Databasin data",
+      "Browse the schema for a Databasin resource",
+      "Validate and run a Databasin SQL plan"
+    ]
+  }
+}
