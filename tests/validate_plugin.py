@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Dependency-light repository checks for the Databasin Claude plugin.
+"""Dependency-light repository checks for the Databasin plugin package.
 
-The script intentionally validates the prompt surfaces that are loaded by the
-plugin (agents, commands, and each skill's SKILL.md), while leaving reference
-material and examples out of the unsafe-instruction scan.  It uses PyYAML when
-the runner already has it, but includes a small fallback for environments
-where installing dependencies is undesirable.
+The script validates both host manifests, active prompt surfaces, the OpenAI
+listing constraints, the deployment-dependent submission documentation, and
+secret/unsafe-instruction patterns. It uses PyYAML when the runner already has
+it, but includes a small fallback for environments where installing
+dependencies is undesirable.
 """
 
 from __future__ import annotations
@@ -40,7 +40,11 @@ def tracked_paths() -> list[Path]:
             if path.is_file() and ".git" not in path.parts
         ]
 
-    paths = {ROOT / item.decode("utf-8") for item in result.stdout.split(b"\0") if item}
+    paths = {
+        ROOT / item.decode("utf-8")
+        for item in result.stdout.split(b"\0")
+        if item and (ROOT / item.decode("utf-8")).is_file()
+    }
     paths.update(
         path
         for path in ROOT.rglob("*")
@@ -221,6 +225,101 @@ def validate_json_and_manifests(paths: list[Path], errors: list[str]) -> set[Pat
     return declared
 
 
+def validate_openai_metadata(errors: list[str]) -> None:
+    """Validate the listing fields that are checked before MCP review."""
+
+    path = PLUGIN_ROOT / ".codex-plugin" / "plugin.json"
+    value = load_json(path, errors)
+    if not isinstance(value, dict):
+        return
+
+    interface = value.get("interface")
+    if not isinstance(interface, dict):
+        errors.append(f"{display(path)}: interface must be an object")
+        return
+
+    short_description = interface.get("shortDescription")
+    if not isinstance(short_description, str):
+        errors.append(f"{display(path)}: shortDescription must be a string")
+    elif len(short_description) > 30:
+        errors.append(f"{display(path)}: shortDescription exceeds 30 characters")
+
+    long_description = interface.get("longDescription")
+    if not isinstance(long_description, str):
+        errors.append(f"{display(path)}: longDescription must be a string")
+    elif len(long_description) > 4000:
+        errors.append(f"{display(path)}: longDescription exceeds 4000 characters")
+
+    display_name = interface.get("displayName")
+    if not isinstance(display_name, str):
+        errors.append(f"{display(path)}: displayName must be a string")
+    elif len(display_name) > 30:
+        errors.append(f"{display(path)}: displayName exceeds 30 characters")
+
+    if interface.get("category") != "Data & Analytics":
+        errors.append(f"{display(path)}: category must be 'Data & Analytics'")
+
+    prompts = interface.get("defaultPrompt")
+    if not isinstance(prompts, list) or len(prompts) > 3:
+        errors.append(f"{display(path)}: defaultPrompt must contain at most three prompts")
+    elif any(
+        not isinstance(prompt, str) or len(prompt) > 128 or "@" in prompt
+        for prompt in prompts
+    ):
+        errors.append(
+            f"{display(path)}: every default prompt must be a string <=128 characters without '@'"
+        )
+
+    marketplace_path = ROOT / ".agents" / "plugins" / "marketplace.json"
+    marketplace = load_json(marketplace_path, errors)
+    if isinstance(marketplace, dict):
+        entries = marketplace.get("plugins")
+        databasin = next(
+            (
+                entry
+                for entry in entries
+                if isinstance(entry, dict) and entry.get("name") == value.get("name")
+            ),
+            None,
+        ) if isinstance(entries, list) else None
+        if not isinstance(databasin, dict):
+            errors.append(f"{display(marketplace_path)}: missing Databasin plugin entry")
+        elif databasin.get("category") != "Data & Analytics":
+            errors.append(f"{display(marketplace_path)}: Databasin category must be 'Data & Analytics'")
+
+
+def validate_submission_documentation(errors: list[str]) -> None:
+    """Keep the documented reviewer matrix aligned with the submission gate."""
+
+    submission_path = PLUGIN_ROOT / "SUBMISSION.md"
+    matrix_path = ROOT / "tests" / "AGENT-BEHAVIOR-MATRIX.md"
+    try:
+        submission = submission_path.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError) as exc:
+        errors.append(f"{display(submission_path)}: cannot read submission checklist ({exc})")
+        return
+    try:
+        matrix = matrix_path.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError) as exc:
+        errors.append(f"{display(matrix_path)}: cannot read behavior matrix ({exc})")
+        return
+
+    missing_tools = sorted(ALLOWED_TOOL_NAMES - set(re.findall(r"`(databasin_[a-z_]+)`", submission)))
+    if missing_tools:
+        errors.append(f"{display(submission_path)}: missing catalog tools: {', '.join(missing_tools)}")
+
+    case_ids = re.findall(r"^\|\s*([PN]\d+)\s*\|", matrix, flags=re.MULTILINE)
+    positive = [case for case in case_ids if case.startswith("P")]
+    negative = [case for case in case_ids if case.startswith("N")]
+    if len(positive) != 5 or set(positive) != {"P1", "P2", "P3", "P4", "P5"}:
+        errors.append(f"{display(matrix_path)}: expected exactly positive cases P1-P5")
+    if len(negative) != 3 or set(negative) != {"N1", "N2", "N3"}:
+        errors.append(f"{display(matrix_path)}: expected exactly negative cases N1-N3")
+    for required in ("tools/list", "deployment", "external gates"):
+        if required.lower() not in submission.lower():
+            errors.append(f"{display(submission_path)}: missing submission requirement wording {required!r}")
+
+
 def parse_frontmatter(block: str) -> str | None:
     """Return an error string, or None when a YAML mapping parses successfully."""
 
@@ -377,6 +476,8 @@ def main() -> int:
     errors: list[str] = []
     paths = tracked_paths()
     validate_json_and_manifests(paths, errors)
+    validate_openai_metadata(errors)
+    validate_submission_documentation(errors)
     active = validate_frontmatter(errors)
     validate_unsafe_prompt_patterns(active, errors)
     validate_secret_like_files(paths, errors)

@@ -1,8 +1,8 @@
 # Databasin plugin
 
-Databasin skills packaged for both Claude Code and Codex/OpenAI. The shared skill content lives in [`plugins/databasin/skills/`](plugins/databasin/skills/), with host-specific manifests for each runtime.
+Databasin MCP-oriented skills packaged for both Claude Code and Codex/OpenAI. The shared skill content lives in [`plugins/databasin/skills/`](plugins/databasin/skills/), with host-specific manifests for each runtime.
 
-This repository contains guidance and plugin metadata. It does not include credentials, a production MCP endpoint, an app registration, or visual assets.
+This repository contains guidance and plugin metadata. It does not include credentials, a production MCP endpoint, an app registration, legal URLs, or visual assets.
 
 ## Install
 
@@ -23,15 +23,15 @@ The Codex package is declared by [`.agents/plugins/marketplace.json`](.agents/pl
 
 ## What is included
 
-- Shared skills for Databasin query assistance, connectors, pipelines, automations, and CLI documentation.
-- Claude Code command and agent metadata for the existing connector, pipeline, project, and connector-list workflows.
+- Shared skills for Databasin query assistance, connector inspection, pipeline planning, and automation planning.
+- Claude Code command and agent metadata for the connector, pipeline, project, and connector-list planning workflows.
 - A Codex manifest that discovers the shared `skills/` directory.
 
-The plugin does not require a local Databasin CLI merely to install or use its guidance. Executing a Databasin operation still requires the access path available in the host environment, such as a deployed and registered remote MCP server.
+The plugin does not require a local Databasin CLI. Live operations require a host-provided, authenticated Databasin MCP connection; installing the plugin alone does not provide one.
 
-## Current MCP tool surface
+## Supported MCP tool catalog
 
-The current Databasin MCP tool names are:
+The supported Databasin MCP catalog contains these names:
 
 - `databasin_get_context`
 - `databasin_search`
@@ -44,7 +44,10 @@ The current Databasin MCP tool names are:
 - `databasin_get_operation`
 - `databasin_cancel_operation`
 
-These names document the intended remote tool surface; they are not a local endpoint configuration.
+The production MCP server may advertise only a deployment-enabled subset. These
+names are not a claim that every deployment exposes every tool, and they are
+not a local endpoint configuration. Use the production `tools/list` response as
+the source of truth for calls and submission tests.
 
 ## Remote MCP wiring
 
@@ -53,6 +56,7 @@ Remote MCP wiring is intentionally deferred until the Databasin MCP service has 
 No `.mcp.json` or `.app.json` is included because this repository does not yet have a real deployed/registered value for either one. Do not replace this note with a guessed URL, app ID, privacy URL, terms URL, or asset path.
 
 See [`plugins/databasin/MCP-SETUP.md`](plugins/databasin/MCP-SETUP.md) for the deployment-gated setup checklist.
+See [`plugins/databasin/SUBMISSION.md`](plugins/databasin/SUBMISSION.md) for the OpenAI submission checklist, tool annotations, reviewer cases, and external gates.
 
 ## License
 

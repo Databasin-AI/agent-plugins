@@ -1,7 +1,7 @@
 {
 	"name": "databasin",
-	"version": "0.8.0",
-	"description": "Databasin skills for data discovery, schema exploration, SQL planning, and data engineering workflows in Claude Code.",
+	"version": "0.8.1",
+	"description": "Databasin MCP workflows for governed data discovery, schema exploration, SQL planning, and bounded read-only analysis.",
 	"author": {
 		"name": "Databasin Team"
 	},
@@ -28,7 +28,6 @@
 	],
 	"skills": [
 		"./skills/databasin-automations",
-		"./skills/databasin-cli-skill",
 		"./skills/databasin-connectors",
 		"./skills/databasin-pipelines",
 		"./skills/databasin-query-assistant"

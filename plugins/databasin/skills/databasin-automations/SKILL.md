@@ -7,7 +7,10 @@ description: Discover caller-visible Databasin automations and draft redacted pr
 
 Use this skill to find automation resources and plan future automation work. The current MCP does not create, update, delete, enable, disable, or run automations.
 
-## Available tools
+## Tools to use when advertised
+
+Use only tools present in the connected server's `tools/list` response. The
+deployment may expose fewer capabilities than the supported catalog.
 
 - `databasin_get_context` returns caller-visible projects, accessible connections, limits, and capabilities.
 - `databasin_search` searches caller-visible automations, pipelines, and connectors.

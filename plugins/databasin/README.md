@@ -1,6 +1,6 @@
 # Databasin plugin
 
-Shared Databasin skills for Claude Code and Codex/OpenAI. The plugin helps an agent discover Databasin resources, understand schemas and table semantics, profile data, validate SQL plans, and manage asynchronous SQL operations.
+Shared Databasin MCP-oriented skills for Claude Code and Codex/OpenAI. The plugin helps an agent discover authorized resources, understand schemas and approved semantics, inspect aggregate profiles, validate read-oriented SQL plans, and manage bounded asynchronous SQL operations.
 
 ## Package layout
 
@@ -11,25 +11,23 @@ plugins/databasin/
 ├── agents/                          # Claude Code agent metadata
 ├── commands/                        # Claude Code command metadata
 ├── skills/                          # Shared skills for both runtimes
-├── examples/                        # Workflow examples
 └── MCP-SETUP.md                     # Deployment-gated MCP setup notes
 ```
 
-Both manifests are version `0.8.0` and discover the shared `skills/` directory. The Claude Code manifest also discovers the existing `commands/` and `agents/` directories.
+Both plugin manifests are version `0.8.1` and discover the shared `skills/` directory. The Claude Code manifest also discovers the command and agent metadata under `commands/` and `agents/`. The Codex interface metadata uses the OpenAI `Data & Analytics` category and the 21-character short description `Explore governed data`.
 
 ## Skills
 
 - `databasin-query-assistant` — data discovery and natural-language query guidance.
-- `databasin-connectors` — connector configuration and troubleshooting guidance.
-- `databasin-pipelines` — pipeline planning and management guidance.
-- `databasin-automations` — automation scheduling and troubleshooting guidance.
-- `databasin-cli-skill` — Databasin CLI documentation and workflow reference.
+- `databasin-connectors` — connector inspection and redacted change-planning guidance.
+- `databasin-pipelines` — pipeline inspection and redacted planning guidance.
+- `databasin-automations` — automation inspection and planning guidance.
 
 The skills are packaged guidance. Installing the plugin does not require a local Databasin CLI. To perform live operations, the host must provide an authorized Databasin access path.
 
-## Current MCP tools
+## Supported MCP tool catalog
 
-The current remote MCP tool surface is:
+The supported remote MCP catalog is:
 
 1. `databasin_get_context`
 2. `databasin_search`
@@ -42,7 +40,10 @@ The current remote MCP tool surface is:
 9. `databasin_get_operation`
 10. `databasin_cancel_operation`
 
-The tool names are documented here for integration planning. They do not imply that a remote server is already connected.
+The production server may advertise only the subset enabled by its deployment
+configuration and backend capabilities. These names are a design catalog, not a
+claim that all ten tools are always present; use the production `tools/list`
+response as the source of truth for calls and submission tests.
 
 ## Remote MCP setup
 
@@ -50,7 +51,7 @@ Remote MCP wiring is added only after the MCP service is deployed and registered
 
 After deployment and registration, add the host-approved configuration using the actual values supplied by that registration. Do not add guessed production URLs, app IDs, privacy or terms URLs, or visual assets.
 
-See [`MCP-SETUP.md`](MCP-SETUP.md) for the checklist.
+See [`MCP-SETUP.md`](MCP-SETUP.md) for the checklist. See [`SUBMISSION.md`](SUBMISSION.md) for the OpenAI review requirements and the exact five-positive/three-negative reviewer matrix.
 
 ## Claude Code commands
 
@@ -60,10 +61,6 @@ Claude Code also discovers the existing command metadata for:
 - `/databasin:list-connectors`
 - `/databasin:create-connector`
 - `/databasin:create-pipeline`
-
-## Examples
-
-The files under [`examples/`](examples/) preserve historical CLI workflows for human reference. They are not active MCP instructions, may be stale, and must not be used to bypass MCP authorization or unavailable capabilities.
 
 ## License
 

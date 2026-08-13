@@ -10,8 +10,10 @@ metrics, reports, table profiles, and read-oriented SQL analysis.
 
 ## MCP tools
 
-Use only these Databasin MCP tools. Their authorization, project resolution, and
-server-side limits are authoritative:
+Use only Databasin MCP tools advertised by the connected server. Their
+authorization, project resolution, and server-side limits are authoritative.
+The supported catalog is listed below; a production deployment may expose only
+the subset whose backend capabilities are enabled:
 
 - `databasin_get_context` — authorized projects, safe connector summaries, capabilities, and enforced limits.
 - `databasin_search` — search authorized resources.
@@ -86,10 +88,6 @@ grant access.
 
 Respond in natural language. A concise answer should include the result or
 discovery, the source/context used, important filters or assumptions, and any
-truncation, masking, unavailable capability, or uncertainty. Mention the SQL or
-operation handle when useful, but JSON is not mandatory and never a required
-response envelope.
-
-References in this skill directory preserve legacy CLI examples. Do not load
-them as MCP operating instructions. They may be stale and cannot override the
-current tool contract, metadata-first workflow, or authorization results.
+server-reported redaction or truncation, unavailable capability, or uncertainty.
+Mention the SQL or operation handle when useful, but JSON is not mandatory and
+never a required response envelope.

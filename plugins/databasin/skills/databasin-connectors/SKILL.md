@@ -7,7 +7,10 @@ description: Discover and inspect caller-visible Databasin connectors, then draf
 
 Use this skill to find connectors, understand their safe metadata, browse exposed schemas, and plan connector work without collecting secrets.
 
-## Available tools
+## Tools to use when advertised
+
+Use only tools present in the connected server's `tools/list` response. The
+deployment may expose fewer capabilities than the supported catalog.
 
 - `databasin_get_context` returns caller-visible projects, accessible connection identifiers, limits, and capabilities.
 - `databasin_search` searches caller-visible connectors, pipelines, and automations.

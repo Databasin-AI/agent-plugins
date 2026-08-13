@@ -5,12 +5,12 @@
 		"name": "Databasin Tools",
 		"email": "tools@databasin.ai"
 	},
-	"version": "0.8.0",
+	"version": "0.8.1",
 	"plugins": [
 		{
 			"name": "databasin",
 			"source": "./plugins/databasin",
-			"description": "Safe Databasin workflows for resource discovery, schema exploration, query planning, and redacted operational proposals.",
+			"description": "Databasin MCP workflows for governed data discovery, schema exploration, query planning, and bounded read-only analysis.",
 			"author": {
 				"name": "Databasin Team"
 			}

@@ -19,7 +19,7 @@ The description, semantic-context, and profile capabilities may return `CAPABILI
 
 ## Planning workflow
 
-1. Resolve the project and accessible connectors using `databasin_get_context`.
+1. If advertised, resolve the project and accessible connectors using `databasin_get_context`; otherwise state that caller context is unavailable and do not guess.
 2. Search for relevant connectors and existing pipelines with `databasin_search`.
 3. Describe selected resources and browse only the schema metadata needed for the plan.
 4. Ask only for non-secret requirements: source and destination references, data scope, transformation intent, naming, and schedule intent.

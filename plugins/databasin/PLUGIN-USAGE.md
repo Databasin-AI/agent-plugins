@@ -1,6 +1,6 @@
 # Databasin plugin usage
 
-This plugin supplies Databasin-specific workflows for Claude Code and Codex/OpenAI. It is designed to guide an agent through the fixed-purpose Databasin MCP tools; it is not an arbitrary API client and does not require the Databasin CLI at runtime.
+This plugin supplies Databasin-specific workflows for Claude Code and Codex/OpenAI. It guides an agent through the fixed-purpose Databasin MCP tools that are advertised by the connected deployment; it is not an arbitrary API client and does not require the Databasin CLI at runtime.
 
 ## Supported workflows
 
@@ -13,11 +13,13 @@ This plugin supplies Databasin-specific workflows for Claude Code and Codex/Open
 
 ## Safety model
 
-- Start with `databasin_get_context` and remain within the returned projects and connectors.
+- If advertised, start with `databasin_get_context` and remain within the returned projects and connectors. If it is not advertised, report that caller context is unavailable rather than guessing access.
 - Prefer metadata, semantic context, and aggregate profiles over raw rows.
 - Never provide credentials, tokens, connection strings, arbitrary URLs, headers, roles, or model-supplied identities to tools.
 - Never use a generic API request or the CLI to bypass missing MCP capabilities.
 - Treat `CAPABILITY_UNAVAILABLE` as a real boundary.
+- Treat the connected server's `tools/list` response as authoritative; do not
+  call a catalog tool that the deployment does not advertise.
 - Validate SQL before calling `databasin_run_sql`; execution may be disabled by deployment policy.
 - Keep SQL columns, rows, bytes, and time ranges bounded.
 
@@ -34,4 +36,4 @@ This plugin supplies Databasin-specific workflows for Claude Code and Codex/Open
 
 The plugin repository intentionally does not contain a guessed production MCP URL or OpenAI app registration ID. Follow [MCP-SETUP.md](MCP-SETUP.md) after a real endpoint has been deployed and registered.
 
-The files under `examples/` and older skill reference directories document historical CLI behavior. They are not active MCP instructions, may be stale, and must never override the current skill contract or server authorization.
+The shipped bundle contains only active MCP-oriented skills and host metadata. Obsolete CLI examples, reference bundles, templates, and helper scripts are intentionally absent so they cannot contradict the fixed tool contract or encourage unsupported mutations.

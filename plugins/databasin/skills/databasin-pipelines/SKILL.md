@@ -7,7 +7,10 @@ description: Inspect caller-visible Databasin pipeline context and draft redacte
 
 Use this skill to understand existing pipeline resources and plan future pipeline work. The current MCP does not create, update, clone, schedule, validate, or run pipelines.
 
-## Available tools
+## Tools to use when advertised
+
+Use only tools present in the connected server's `tools/list` response. The
+deployment may expose fewer capabilities than the supported catalog.
 
 - `databasin_get_context` returns caller-visible projects, accessible connection identifiers, limits, and capabilities.
 - `databasin_search` searches caller-visible pipelines, connectors, and automations.

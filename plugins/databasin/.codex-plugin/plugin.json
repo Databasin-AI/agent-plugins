@@ -1,7 +1,7 @@
 {
   "name": "databasin",
-  "version": "0.8.0",
-  "description": "Databasin skills for data discovery, schema exploration, SQL planning, and data engineering workflows in Codex.",
+  "version": "0.8.1",
+  "description": "Databasin MCP workflows for governed data discovery, schema exploration, SQL planning, and bounded read-only analysis.",
   "author": {
     "name": "Databasin Team"
   },
@@ -17,20 +17,20 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Databasin",
-    "shortDescription": "Explore Databasin data and plan SQL workflows.",
-    "longDescription": "Use Databasin skills to discover resources, browse schemas, understand table semantics, profile data, validate SQL plans, and manage asynchronous query operations.",
+    "shortDescription": "Explore governed data",
+    "longDescription": "Use Databasin's fixed-purpose MCP tools to discover authorized resources, browse schemas, read approved semantic context, inspect aggregate profiles, validate read-oriented SQL plans, and manage bounded asynchronous query operations. Connector, pipeline, and automation changes remain planning-only unless a separately governed capability is enabled.",
     "developerName": "Databasin Team",
-    "category": "Productivity",
+    "category": "Data & Analytics",
     "capabilities": [
       "Data discovery",
       "Schema exploration",
       "SQL planning",
-      "SQL execution"
+      "Read-oriented SQL analysis"
     ],
     "defaultPrompt": [
-      "Help me explore Databasin data",
-      "Browse the schema for a Databasin resource",
-      "Validate and run a Databasin SQL plan"
+      "Explore authorized Databasin data",
+      "Browse a Databasin schema",
+      "Validate a bounded read-only query"
     ]
   }
 }
