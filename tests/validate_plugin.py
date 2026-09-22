@@ -20,6 +20,33 @@ from typing import Iterable
 
 ROOT = Path(__file__).resolve().parents[1]
 PLUGIN_ROOT = ROOT / "plugins" / "databasin"
+EXPECTED_PLUGIN_VERSION = "0.9.0"
+EXPECTED_MCP_PACKAGE = "@databasin/mcp-client@0.2.0"
+
+REMOTE_TOOL_NAMES = {
+    "databasin_get_capabilities",
+    "databasin_get_context",
+    "databasin_search",
+    "databasin_get_schema",
+    "databasin_run_agent",
+    "databasin_get_agent_run",
+    "databasin_cancel_agent_run",
+    "databasin_run_query",
+    "databasin_get_query_status",
+    "databasin_cancel_query",
+    "databasin_run_assistant",
+    "databasin_get_support_context",
+    "databasin_list_support_tickets",
+    "databasin_get_support_ticket",
+    "databasin_create_support_ticket",
+    "databasin_add_support_ticket_message",
+    "databasin_update_support_ticket",
+    "databasin_list_support_notifications",
+    "databasin_mark_support_notification_read",
+    "databasin_mark_all_support_notifications_read",
+}
+LOCAL_TOOL_NAMES = {"databasin_auth_status", "databasin_login"}
+ALLOWED_TOOL_NAMES = REMOTE_TOOL_NAMES | LOCAL_TOOL_NAMES
 
 
 def tracked_paths() -> list[Path]:
@@ -150,8 +177,21 @@ def validate_json_and_manifests(paths: list[Path], errors: list[str]) -> set[Pat
         errors.append(f"{display(plugin_manifest_path)}: manifest must be a JSON object")
         return declared
 
+    if plugin.get("version") != EXPECTED_PLUGIN_VERSION:
+        errors.append(
+            f"{display(plugin_manifest_path)}: version must be {EXPECTED_PLUGIN_VERSION!r}"
+        )
+    if plugin.get("displayName") != "Databasin":
+        errors.append(f"{display(plugin_manifest_path)}: displayName must be 'Databasin'")
+    if plugin.get("repository") != "https://github.com/Databasin-AI/agent-plugins":
+        errors.append(f"{display(plugin_manifest_path)}: repository metadata is missing or stale")
+    if plugin.get("mcpServers") != "./.mcp.json":
+        errors.append(f"{display(plugin_manifest_path)}: mcpServers must reference './.mcp.json'")
+
     for component_type, expected in (("agents", "file"), ("commands", "file"), ("skills", "skill")):
         values = plugin.get(component_type)
+        if values is None:
+            continue
         if not isinstance(values, list):
             errors.append(f"{display(plugin_manifest_path)}: '{component_type}' must be an array")
             continue
@@ -213,6 +253,10 @@ def validate_json_and_manifests(paths: list[Path], errors: list[str]) -> set[Pat
             errors.append("Claude and Codex plugin names must match")
         if codex.get("version") != plugin.get("version"):
             errors.append("Claude and Codex plugin versions must match")
+        if codex.get("repository") != plugin.get("repository"):
+            errors.append("Claude and Codex plugin repositories must match")
+        if codex.get("mcpServers") != "./.mcp.json":
+            errors.append(f"{display(codex_manifest_path)}: mcpServers must reference './.mcp.json'")
         skills_path = resolve_declared_path(
             PLUGIN_ROOT,
             codex.get("skills"),
@@ -221,6 +265,20 @@ def validate_json_and_manifests(paths: list[Path], errors: list[str]) -> set[Pat
         )
         if skills_path is not None and not skills_path.is_dir():
             errors.append(f"{display(codex_manifest_path)}: skills path must be a directory")
+
+    mcp_path = PLUGIN_ROOT / ".mcp.json"
+    mcp = parsed.get(mcp_path)
+    expected_server = {
+        "command": "npx",
+        "args": ["-y", EXPECTED_MCP_PACKAGE, "--environment", "prod"],
+    }
+    if not isinstance(mcp, dict) or mcp.get("mcpServers") != {"databasin": expected_server}:
+        errors.append(
+            f"{display(mcp_path)}: must pin the production stdio client to {EXPECTED_MCP_PACKAGE}"
+        )
+
+    if isinstance(marketplace, dict) and marketplace.get("version") != EXPECTED_PLUGIN_VERSION:
+        errors.append(".claude-plugin/marketplace.json: version must match the plugin release")
 
     return declared
 
@@ -304,7 +362,7 @@ def validate_submission_documentation(errors: list[str]) -> None:
         errors.append(f"{display(matrix_path)}: cannot read behavior matrix ({exc})")
         return
 
-    missing_tools = sorted(ALLOWED_TOOL_NAMES - set(re.findall(r"`(databasin_[a-z_]+)`", submission)))
+    missing_tools = sorted(REMOTE_TOOL_NAMES - set(re.findall(r"`(databasin_[a-z_]+)`", submission)))
     if missing_tools:
         errors.append(f"{display(submission_path)}: missing catalog tools: {', '.join(missing_tools)}")
 
@@ -402,20 +460,6 @@ MANDATORY_SAMPLE_WORDS = re.compile(r"(?i)\b(?:always|must|required|mandatory|de
 SELECT_STAR = re.compile(r"(?i)\bselect\s+\*\b")
 NEGATIVE_SAFETY_WORDS = re.compile(r"(?i)\b(?:do not|don't|never|avoid|not)\b")
 TOOL_NAME = re.compile(r"\bdatabasin_[a-z_]+\b")
-ALLOWED_TOOL_NAMES = {
-    "databasin_get_context",
-    "databasin_search",
-    "databasin_describe_resource",
-    "databasin_browse_schema",
-    "databasin_get_semantic_context",
-    "databasin_profile_table",
-    "databasin_validate_plan",
-    "databasin_run_sql",
-    "databasin_get_operation",
-    "databasin_cancel_operation",
-}
-
-
 def validate_unsafe_prompt_patterns(active: Iterable[Path], errors: list[str]) -> None:
     for path in active:
         try:
@@ -433,6 +477,31 @@ def validate_unsafe_prompt_patterns(active: Iterable[Path], errors: list[str]) -
             for tool_name in TOOL_NAME.findall(line):
                 if tool_name not in ALLOWED_TOOL_NAMES:
                     errors.append(f"{display(path)}:{line_number}: unknown Databasin MCP tool {tool_name!r}")
+
+
+def validate_documented_tools(paths: Iterable[Path], errors: list[str]) -> None:
+    """Reject retired or invented tool names across shipped user-facing docs."""
+
+    checked = {
+        ROOT / "README.md",
+        ROOT / "tests" / "AGENT-BEHAVIOR-MATRIX.md",
+        PLUGIN_ROOT / "README.md",
+        PLUGIN_ROOT / "MCP-SETUP.md",
+        PLUGIN_ROOT / "PLUGIN-USAGE.md",
+        PLUGIN_ROOT / "SUBMISSION.md",
+        *active_prompt_files(),
+    }
+    for path in sorted(set(paths) & checked):
+        try:
+            lines = path.read_text(encoding="utf-8").splitlines()
+        except (OSError, UnicodeDecodeError):
+            continue
+        for line_number, line in enumerate(lines, start=1):
+            for tool_name in TOOL_NAME.findall(line):
+                if tool_name not in ALLOWED_TOOL_NAMES:
+                    errors.append(
+                        f"{display(path)}:{line_number}: retired or unknown Databasin MCP tool {tool_name!r}"
+                    )
 
 
 SECRET_FILENAME = re.compile(
@@ -480,6 +549,7 @@ def main() -> int:
     validate_submission_documentation(errors)
     active = validate_frontmatter(errors)
     validate_unsafe_prompt_patterns(active, errors)
+    validate_documented_tools(paths, errors)
     validate_secret_like_files(paths, errors)
 
     if errors:

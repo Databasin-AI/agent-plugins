@@ -1,18 +1,20 @@
 {
 	"name": "databasin-tools",
-	"description": "Databasin plugins for safe data discovery, schema exploration, query planning, and redacted operational proposals.",
+	"description": "Databasin plugins for governed data discovery, schema exploration, read-only analysis, agent runs, and support workflows.",
 	"owner": {
 		"name": "Databasin Tools",
-		"email": "tools@databasin.ai"
+		"email": "info@databasin.co"
 	},
-	"version": "0.8.1",
+	"version": "0.9.0",
 	"plugins": [
 		{
 			"name": "databasin",
+			"displayName": "Databasin",
 			"source": "./plugins/databasin",
-			"description": "Databasin MCP workflows for governed data discovery, schema exploration, query planning, and bounded read-only analysis.",
+			"description": "Connect Claude Code to Databasin for governed data discovery, schema exploration, read-only analysis, agent runs, and support tickets.",
 			"author": {
-				"name": "Databasin Team"
+				"name": "Databasin Team",
+				"email": "info@databasin.co"
 			}
 		}
 	]

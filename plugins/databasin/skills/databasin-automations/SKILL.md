@@ -1,27 +1,33 @@
 ---
 name: databasin-automations
-description: Discover caller-visible Databasin automations and draft redacted proposals for unsupported automation changes.
+description: Discover caller-visible Databasin automations and draft redacted proposals for unsupported automation changes. Use for automation inventory, dependencies, schedules, or change planning.
 ---
 
 # Databasin Automations
 
 Use this skill to find automation resources and plan future automation work. The current MCP does not create, update, delete, enable, disable, or run automations.
 
-## Tools to use when advertised
+## Tools
 
-Use only tools present in the connected server's `tools/list` response. The
-deployment may expose fewer capabilities than the supported catalog.
+Treat the connected server's `tools/list` response as authoritative. Authenticate
+with the client-local `databasin_auth_status` and `databasin_login` tools when
+needed, then call `databasin_get_capabilities` before product tools.
 
-- `databasin_get_context` returns caller-visible projects, accessible connections, limits, and capabilities.
-- `databasin_search` searches caller-visible automations, pipelines, and connectors.
-- `databasin_describe_resource` returns a bounded, redacted automation or related-resource description when the backend capability is available.
+- Use `databasin_get_context` for caller-visible projects and connectors.
+- Use `databasin_search` for bounded automation, pipeline, and connector metadata.
+- Use `databasin_run_agent` with the fixed `metadata_readonly` profile only when a
+  deeper metadata question cannot be answered from context and search. Use the
+  run status and cancellation tools only for the returned run identifier.
 
 ## Workflow
 
-1. Call `databasin_get_context` and remain inside the caller-visible project set.
+1. Call `databasin_get_capabilities`, then `databasin_get_context`, and remain
+   inside the caller-visible project set.
 2. Use `databasin_search` to locate relevant automations and dependencies.
-3. Use `databasin_describe_resource` for a selected automation, pipeline, or connector. If it reports `CAPABILITY_UNAVAILABLE`, explain the limitation instead of guessing configuration or status.
-4. For create, update, delete, enable, disable, test, or run requests, return a redacted proposal only.
+3. If authorized metadata is insufficient, either ask a focused question or use
+   `databasin_run_agent` within an explicit returned institution/project scope.
+4. For create, update, delete, enable, disable, test, or run requests, return a
+   redacted proposal only.
 
 Include schedule or trigger intent, task outline, dependencies, timezone assumptions, risks, and validation checks. Never request or expose credentials, tokens, secret task parameters, notebook contents, or private configuration. Do not write automation files or invoke a shell, CLI, generic HTTP client, or arbitrary API route.
 

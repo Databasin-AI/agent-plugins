@@ -1,73 +1,62 @@
 ---
 name: databasin-query-assistant
-description: Answer Databasin data-discovery and analytical questions with an MCP-native, metadata-first workflow.
+description: Answer Databasin discovery and analytical questions with MCP-native context, schema, read-only SQL, bounded assistant, and metadata-agent workflows. Use for finding data, understanding schemas, running bounded queries, or requesting multi-step read-only analysis.
 ---
 
 # Databasin Query Assistant
 
 Use this skill for questions about data available in Databasin, schema discovery,
-metrics, reports, table profiles, and read-oriented SQL analysis.
+metrics, reports, and bounded read-only SQL or assistant analysis.
 
 ## MCP tools
 
-Use only Databasin MCP tools advertised by the connected server. Their
-authorization, project resolution, and server-side limits are authoritative.
-The supported catalog is listed below; a production deployment may expose only
-the subset whose backend capabilities are enabled:
+Use only Databasin MCP tools advertised by the connected server. Authenticate
+with `databasin_auth_status` and `databasin_login` when needed. Treat the live
+`tools/list` response, `databasin_get_capabilities`, authorization results, and
+server-side limits as authoritative.
 
-- `databasin_get_context` — authorized projects, safe connector summaries, capabilities, and enforced limits.
-- `databasin_search` — search authorized resources.
-- `databasin_describe_resource` — inspect a typed resource without exposing secrets or raw rows.
-- `databasin_browse_schema` — browse one catalog/schema/table/column level at a time.
-- `databasin_get_semantic_context` — retrieve bounded approved definitions for a project or selected resources.
-- `databasin_profile_table` — get bounded row and column counts without returning table rows.
-- `databasin_validate_plan` — validate a text plan for an optional project; it never executes.
-- `databasin_run_sql` — start an authorized, read-oriented SQL operation.
-- `databasin_get_operation` — poll an operation and fetch bounded result pages.
-- `databasin_cancel_operation` — cancel an operation when the user asks or it is no longer needed.
+- `databasin_get_context`, `databasin_search`, and `databasin_get_schema` provide
+  direct authorized discovery and schema metadata.
+- `databasin_run_query`, `databasin_get_query_status`, and
+  `databasin_cancel_query` manage bounded read-only SQL.
+- `databasin_run_assistant` handles a bounded multi-step natural-language task
+  against one authorized connector. It does not replace the SQL tool.
+- `databasin_run_agent`, `databasin_get_agent_run`, and
+  `databasin_cancel_agent_run` manage the fixed `metadata_readonly` agent profile
+  within an explicit institution/project/connector scope.
 
 Do not invent tool names or bypass these tools with generic HTTP/API calls.
 
 ## Default workflow
 
-1. **Resolve context.** Call `databasin_get_context`. If the user did not identify
-   a project or source, use the returned authorized context and
-   `databasin_search`; never guess across projects or infer access from an ID.
-2. **Understand meaning before data.** Use `databasin_describe_resource`,
-   `databasin_browse_schema`, and `databasin_get_semantic_context` to identify the
-   relevant connector, tables, columns, and available business definitions.
-   Prefer the smallest useful set of calls and do not infer relationships that
-   the tools did not return.
-3. **Profile only as needed.** Use `databasin_profile_table` for counts, null or
-   distinct counts and other returned aggregate metadata. This tool does not
-   return a row sample. Do not access raw rows merely to explore.
-4. **Plan explicitly.** Translate the question into a read-only query with
+1. **Resolve capabilities and context.** Call `databasin_get_capabilities`, then
+   `databasin_get_context`. If the user did not identify a project or source,
+   use `databasin_search`; never guess across projects or infer access from an ID.
+2. **Understand the schema.** Use `databasin_get_schema` to identify the relevant
+   catalog, schema, table, and columns one bounded level at a time. Prefer the
+   smallest useful set of calls and do not infer relationships not returned.
+3. **Choose the narrowest execution path.** Use direct discovery for metadata,
+   `databasin_run_query` for explicit SQL, `databasin_run_assistant` for bounded
+   connector analysis, or `databasin_run_agent` for scoped metadata work. Do not
+   call multiple execution paths when one is sufficient.
+4. **Plan SQL explicitly.** Translate the question into a read-only query with
    explicit columns, appropriate filters, joins, aggregates, and bounded output.
    Do not use `SELECT *` as a default and do not make sampling a mandatory step.
-5. **Validate before execution.** Call `databasin_validate_plan` with the SQL as
-   the plan and the selected project ID when available. Respect its `valid`,
-   `warnings`, and `errors` result. Fix or clarify the plan if validation does
-   not approve it.
-6. **Run, then poll.** After validation, call `databasin_run_sql` with only the
-   approved connector ID and SQL, with a bounded timeout. It returns an
-   operation identifier. Then call `databasin_get_operation` and poll until
-   terminal, fetching only bounded pages with `offset` and `limit`.
-   Stop when the answer is supported; use `databasin_cancel_operation` for
-   cancellation.
+5. **Run and follow status truthfully.** Call `databasin_run_query` with the
+   authorized connector, SQL in `code`, and the smallest useful `maxRows` up to
+   1000. If it is not terminal, use `databasin_get_query_status`. Use
+   `databasin_cancel_query` only when the user asks or the work is no longer
+   needed. Apply the equivalent status/cancellation lifecycle to agent runs.
 
-`databasin_run_sql` is read-oriented, but it is not authorized by a string check
-such as `SELECT` at the start of a query. Rely on server validation and policy.
+`databasin_run_query` accepts only one server-validated `SELECT` or `WITH`
+statement. Do not rely on a client-side prefix check or attempt to bypass the
+server policy.
 
 ## Capability and access handling
 
-Capabilities are part of the returned context and tool results. SQL may be
-disabled. If it is disabled, do not call `databasin_run_sql`; explain that the
-requested SQL path is unavailable and offer an answer from available metadata,
-semantic context, or profiling only when sufficient. Likewise,
-`databasin_describe_resource`, `databasin_profile_table`, or
-`databasin_get_semantic_context` may report capability unavailable. Treat that as
-an honest boundary, not as permission to guess another project, endpoint, or
-credential.
+Capabilities are returned by the server. If a path is absent or denied, explain
+the boundary and offer the least-privileged advertised alternative. Do not guess
+another project, endpoint, identity, role, or credential.
 
 Raw row access is not the default. Use it only when it is necessary to answer the
 user, authorized by the tool, and more informative than an aggregate or masked

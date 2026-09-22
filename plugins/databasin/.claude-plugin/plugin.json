@@ -1,11 +1,15 @@
 {
 	"name": "databasin",
-	"version": "0.8.1",
-	"description": "Databasin MCP workflows for governed data discovery, schema exploration, SQL planning, and bounded read-only analysis.",
+	"displayName": "Databasin",
+	"version": "0.9.0",
+	"description": "Connect Claude Code to Databasin for governed data discovery, schema exploration, read-only analysis, agent runs, and support tickets.",
 	"author": {
-		"name": "Databasin Team"
+		"name": "Databasin Team",
+		"email": "info@databasin.co",
+		"url": "https://www.databasin.ai"
 	},
-	"homepage": "https://databasin.ai",
+	"homepage": "https://www.databasin.ai",
+	"repository": "https://github.com/Databasin-AI/agent-plugins",
 	"license": "CC-BY-4.0",
 	"keywords": [
 		"databasin",
@@ -17,9 +21,7 @@
 		"trino",
 		"reporting"
 	],
-	"agents": [
-		"./agents/databasin-pipeline-creator.md"
-	],
+	"mcpServers": "./.mcp.json",
 	"commands": [
 		"./commands/create-connector.md",
 		"./commands/create-pipeline.md",
@@ -30,6 +32,7 @@
 		"./skills/databasin-automations",
 		"./skills/databasin-connectors",
 		"./skills/databasin-pipelines",
-		"./skills/databasin-query-assistant"
+		"./skills/databasin-query-assistant",
+		"./skills/databasin-support"
 	]
 }

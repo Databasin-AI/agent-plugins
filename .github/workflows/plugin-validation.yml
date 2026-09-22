@@ -18,12 +18,15 @@ jobs:
       - name: Validate JSON, manifest paths, frontmatter, safety patterns, and secrets
         run: python3 tests/validate_plugin.py
 
-      - name: Validate with Claude Code when already available
-        shell: bash
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Install the submission validator
+        run: npm install --global @anthropic-ai/claude-code@2.1.280
+
+      - name: Validate with Claude Code
         run: |
-          if command -v claude >/dev/null 2>&1; then
-            claude plugin validate --strict plugins/databasin
-            claude plugin validate --strict .claude-plugin/marketplace.json
-          else
-            echo "Claude Code is not installed on this runner; skipping optional plugin validation."
-          fi
+          claude plugin validate --strict plugins/databasin
+          claude plugin validate --strict .claude-plugin/marketplace.json

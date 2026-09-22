@@ -1,66 +1,61 @@
 # Databasin plugin
 
-Shared Databasin MCP-oriented skills for Claude Code and Codex/OpenAI. The plugin helps an agent discover authorized resources, understand schemas and approved semantics, inspect aggregate profiles, validate read-oriented SQL plans, and manage bounded asynchronous SQL operations.
+Connect Claude Code or Codex to Databasin's production MCP service for governed
+data discovery, read-only analysis, metadata-agent runs, and support tickets.
 
-## Package layout
+## Requirements
 
-```text
-plugins/databasin/
-├── .claude-plugin/plugin.json       # Claude Code manifest
-├── .codex-plugin/plugin.json        # Codex/OpenAI manifest
-├── agents/                          # Claude Code agent metadata
-├── commands/                        # Claude Code command metadata
-├── skills/                          # Shared skills for both runtimes
-└── MCP-SETUP.md                     # Deployment-gated MCP setup notes
-```
+- Node.js 22.20+ or Node.js 24.
+- An available OS-protected credential store. Linux requires an unlocked Secret
+  Service/libsecret keyring; the client does not fall back to plaintext storage.
+- A Databasin account authorized through the production Microsoft Entra tenant.
 
-Both plugin manifests are version `0.8.1` and discover the shared `skills/` directory. The Claude Code manifest also discovers the command and agent metadata under `commands/` and `agents/`. The Codex interface metadata uses the OpenAI `Data & Analytics` category and the 21-character short description `Explore governed data`.
+The plugin starts `@databasin/mcp-client@0.2.0` from [`.mcp.json`](.mcp.json).
+On first use, call `databasin_login` and follow the Microsoft device sign-in
+instructions. Never provide credentials or tokens in chat.
 
-## Skills
+## Capabilities
 
-- `databasin-query-assistant` — data discovery and natural-language query guidance.
-- `databasin-connectors` — connector inspection and redacted change-planning guidance.
-- `databasin-pipelines` — pipeline inspection and redacted planning guidance.
-- `databasin-automations` — automation inspection and planning guidance.
+The production server owns the tool schemas and advertises them through
+`tools/list`. The current server catalog contains:
 
-The skills are packaged guidance. Installing the plugin does not require a local Databasin CLI. To perform live operations, the host must provide an authorized Databasin access path.
+- Discovery: `databasin_get_capabilities`, `databasin_get_context`,
+  `databasin_search`, and `databasin_get_schema`.
+- Metadata agent: `databasin_run_agent`, `databasin_get_agent_run`, and
+  `databasin_cancel_agent_run`.
+- Read-only SQL: `databasin_run_query`, `databasin_get_query_status`, and
+  `databasin_cancel_query`.
+- Bounded assistant: `databasin_run_assistant`.
+- Support: `databasin_get_support_context`,
+  `databasin_list_support_tickets`, `databasin_get_support_ticket`,
+  `databasin_create_support_ticket`, `databasin_add_support_ticket_message`,
+  `databasin_update_support_ticket`, `databasin_list_support_notifications`,
+  `databasin_mark_support_notification_read`, and
+  `databasin_mark_all_support_notifications_read`.
 
-## Supported MCP tool catalog
+The local MCP client also provides `databasin_auth_status` and
+`databasin_login`. These are authentication helpers, not remote product tools.
 
-The supported remote MCP catalog is:
+Ticket detail and message results include email addresses. Treat them as
+personal data: show them only when relevant, do not infer identity from them,
+and never copy unrelated addresses into new tickets or messages.
 
-1. `databasin_get_context`
-2. `databasin_search`
-3. `databasin_describe_resource`
-4. `databasin_browse_schema`
-5. `databasin_get_semantic_context`
-6. `databasin_profile_table`
-7. `databasin_validate_plan`
-8. `databasin_run_sql`
-9. `databasin_get_operation`
-10. `databasin_cancel_operation`
+## Skills and Claude Code commands
 
-The production server may advertise only the subset enabled by its deployment
-configuration and backend capabilities. These names are a design catalog, not a
-claim that all ten tools are always present; use the production `tools/list`
-response as the source of truth for calls and submission tests.
-
-## Remote MCP setup
-
-Remote MCP wiring is added only after the MCP service is deployed and registered with the target host. This repository intentionally omits `.mcp.json` and `.app.json`: no real deployment endpoint or app registration value is available yet.
-
-After deployment and registration, add the host-approved configuration using the actual values supplied by that registration. Do not add guessed production URLs, app IDs, privacy or terms URLs, or visual assets.
-
-See [`MCP-SETUP.md`](MCP-SETUP.md) for the checklist. See [`SUBMISSION.md`](SUBMISSION.md) for the OpenAI review requirements and the exact five-positive/three-negative reviewer matrix.
-
-## Claude Code commands
-
-Claude Code also discovers the existing command metadata for:
+Shared skills cover query assistance, connector inspection, pipeline planning,
+automation planning, and support tickets. Claude Code also provides:
 
 - `/databasin:list-projects`
 - `/databasin:list-connectors`
 - `/databasin:create-connector`
 - `/databasin:create-pipeline`
+
+The create commands are planning-only because MCP does not expose connector,
+pipeline, or automation mutations.
+
+See [PLUGIN-USAGE.md](PLUGIN-USAGE.md) for operating guidance,
+[MCP-SETUP.md](MCP-SETUP.md) for connection details, and
+[SUBMISSION.md](SUBMISSION.md) for release gates.
 
 ## License
 
