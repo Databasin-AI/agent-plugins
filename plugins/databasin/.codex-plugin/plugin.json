@@ -1,6 +1,6 @@
 {
   "name": "databasin",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "description": "Connect Codex to Databasin for governed data discovery, schema exploration, read-only analysis, agent runs, and support tickets.",
   "author": {
     "name": "Databasin Team",

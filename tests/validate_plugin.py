@@ -20,7 +20,7 @@ from typing import Iterable
 
 ROOT = Path(__file__).resolve().parents[1]
 PLUGIN_ROOT = ROOT / "plugins" / "databasin"
-EXPECTED_PLUGIN_VERSION = "0.9.0"
+EXPECTED_PLUGIN_VERSION = "0.9.1"
 EXPECTED_MCP_PACKAGE = "@databasin/mcp-client@0.2.0"
 
 REMOTE_TOOL_NAMES = {
@@ -271,10 +271,12 @@ def validate_json_and_manifests(paths: list[Path], errors: list[str]) -> set[Pat
     expected_server = {
         "command": "npx",
         "args": ["-y", EXPECTED_MCP_PACKAGE, "--environment", "prod"],
+        "env_vars": ["DBUS_SESSION_BUS_ADDRESS", "XDG_RUNTIME_DIR"],
     }
     if not isinstance(mcp, dict) or mcp.get("mcpServers") != {"databasin": expected_server}:
         errors.append(
-            f"{display(mcp_path)}: must pin the production stdio client to {EXPECTED_MCP_PACKAGE}"
+            f"{display(mcp_path)}: must pin the production stdio client to {EXPECTED_MCP_PACKAGE} "
+            "and forward only DBUS_SESSION_BUS_ADDRESS and XDG_RUNTIME_DIR for secure Linux storage"
         )
 
     if isinstance(marketplace, dict) and marketplace.get("version") != EXPECTED_PLUGIN_VERSION:

@@ -1,6 +1,6 @@
 # Claude Code community submission checklist
 
-This is the release handoff for Databasin plugin `0.9.0`. The repository content
+This is the release handoff for Databasin plugin `0.9.1`. The repository content
 is prepared for Anthropic's `claude-community` marketplace, but the production
 dependency gates below must pass before the submission form is sent.
 
@@ -8,7 +8,7 @@ dependency gates below must pass before the submission form is sent.
 
 - Plugin name: `databasin`
 - Display name: `Databasin`
-- Version: `0.9.0`
+- Version: `0.9.1`
 - Publisher: Databasin Team (`info@databasin.co`)
 - Homepage: <https://www.databasin.ai>
 - Repository: <https://github.com/Databasin-AI/agent-plugins>
@@ -90,7 +90,7 @@ python3 /home/founder3/.codex/skills/.system/plugin-creator/scripts/validate_plu
 Then test the exact release commit from a clean Claude Code profile:
 
 1. Add the repository marketplace and install `databasin@databasin-tools`.
-2. Confirm the plugin picker shows `Databasin`, version `0.9.0`, the description,
+2. Confirm the plugin picker shows `Databasin`, version `0.9.1`, the description,
    publisher, and repository.
 3. Confirm the MCP server starts with no plugin errors.
 4. Run `databasin_auth_status`, complete `databasin_login`, then verify the two
