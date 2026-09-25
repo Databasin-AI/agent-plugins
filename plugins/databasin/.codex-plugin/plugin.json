@@ -1,0 +1,44 @@
+{
+  "name": "databasin",
+  "version": "0.9.0",
+  "description": "Connect Codex to Databasin for governed data discovery, schema exploration, read-only analysis, agent runs, and support tickets.",
+  "author": {
+    "name": "Databasin Team",
+    "email": "info@databasin.co",
+    "url": "https://www.databasin.ai"
+  },
+  "homepage": "https://www.databasin.ai",
+  "repository": "https://github.com/Databasin-AI/agent-plugins",
+  "license": "CC-BY-4.0",
+  "keywords": [
+    "databasin",
+    "data discovery",
+    "schema",
+    "sql",
+    "data engineering"
+  ],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "Databasin",
+    "shortDescription": "Explore governed data",
+    "longDescription": "Connect to Databasin through its true MCP client to discover authorized projects and connectors, browse schemas, run bounded read-only SQL and assistant workflows, inspect agent runs, and work with support tickets and notifications. Connector, pipeline, and automation changes remain planning-only.",
+    "developerName": "Databasin Team",
+    "category": "Data & Analytics",
+    "capabilities": [
+      "Data discovery",
+      "Schema exploration",
+      "Read-only SQL analysis",
+      "Agent-assisted analysis",
+      "Support tickets"
+    ],
+    "websiteURL": "https://www.databasin.ai",
+    "privacyPolicyURL": "https://www.databasin.ai/legal/privacy/",
+    "termsOfServiceURL": "https://www.databasin.ai/legal/tos/",
+    "defaultPrompt": [
+      "Explore authorized Databasin data",
+      "Run a bounded read-only Databasin query",
+      "Show my Databasin support tickets"
+    ]
+  }
+}

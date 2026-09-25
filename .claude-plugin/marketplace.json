@@ -1,17 +1,20 @@
 {
 	"name": "databasin-tools",
+	"description": "Databasin plugins for governed data discovery, schema exploration, read-only analysis, agent runs, and support workflows.",
 	"owner": {
 		"name": "Databasin Tools",
-		"email": "tools@databasin.ai"
+		"email": "info@databasin.co"
 	},
-	"version": "0.7.0",
+	"version": "0.9.0",
 	"plugins": [
 		{
 			"name": "databasin",
-			"source": "./.plugins/databasin",
-			"description": "Provides a variety of tools to interact with Databasin platform, including querying datasets, managing data pipelines, and accessing metadata.",			
+			"displayName": "Databasin",
+			"source": "./plugins/databasin",
+			"description": "Connect Claude Code to Databasin for governed data discovery, schema exploration, read-only analysis, agent runs, and support tickets.",
 			"author": {
-				"name": "Databasin Team"
+				"name": "Databasin Team",
+				"email": "info@databasin.co"
 			}
 		}
 	]

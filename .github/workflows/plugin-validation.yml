@@ -1,0 +1,32 @@
+name: Plugin validation
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate plugin metadata and prompt surfaces
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Validate JSON, manifest paths, frontmatter, safety patterns, and secrets
+        run: python3 tests/validate_plugin.py
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Install the submission validator
+        run: npm install --global @anthropic-ai/claude-code@2.1.280
+
+      - name: Validate with Claude Code
+        run: |
+          claude plugin validate --strict plugins/databasin
+          claude plugin validate --strict .claude-plugin/marketplace.json

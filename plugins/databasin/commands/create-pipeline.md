@@ -1,20 +1,17 @@
 ---
-description: Create a Databasin pipeline using the pipeline agent and an interactive workflow
+description: Inspect Databasin resources and draft a redacted pipeline plan
 ---
 
-# Create Databasin Pipeline
+# Plan Databasin Pipeline
 
-Have the @agent-databasin-pipeline-creator agent guide the user through creating a Databasin data pipeline using the databasin-pipeline.
+Use the `databasin-pipelines` skill. The current MCP cannot create, validate,
+clone, schedule, or run pipelines.
 
-The skill supports:
-- Database/Catalog, Schema, and Table discovery
-- AI recommendations for how to ingest data
-- Programmatic creation using individual CLI commands
-- Full validation and error handling
-- Complete documentation and working examples
+Call `databasin_get_capabilities`, then use `databasin_get_context`,
+`databasin_search`, and `databasin_get_schema` as needed. Use
+`databasin_run_agent` only with the fixed `metadata_readonly` profile and an
+explicit authorized scope when direct metadata is insufficient. Treat absent or
+denied capabilities as boundaries. Do not invoke a shell or generic API client,
+collect credentials, write secret or deployment files, or simulate execution.
 
-The databasin-pipelines skill provides comprehensive documentation, examples, and templates for all pipeline creation approaches.
-
-## Instructions
-
-Use the databasin-pipelines skill and the databasin CLI tool to create a new pipeline based on the information provide in the conversation, the databasin CLI help and docs, available templates, and information returned by the databasin CLI such as a list of schemas for the user to choose from. The agent should ask the user clarifying questions when more context is needed, or a choice needs to be made.
+Return a redacted, non-executable proposal covering source and destination references, artifacts, transformations, schedule intent, assumptions, risks, and validation checks. Explain the unavailable capability. Any future execution requires validation, explicit approval, and an idempotency key or stable plan hash.
