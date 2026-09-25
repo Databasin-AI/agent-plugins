@@ -25,6 +25,24 @@ OS-protected credential store and sends a bearer token only on remote
 
 ## Local checks
 
+### Linux desktop credential storage
+
+Version 0.9.1 explicitly forwards `DBUS_SESSION_BUS_ADDRESS` and
+`XDG_RUNTIME_DIR` from the host session to the MCP process. Codex otherwise
+filters these variables, preventing the client from reaching the Linux Secret
+Service even when the user is already signed in. These are session connection
+settings, not tokens; no values are bundled or copied into configuration.
+Claude Code already inherits the desktop environment. On macOS and Windows,
+unset Linux variables do not change the native credential-store behavior.
+
+Run the host inside your logged-in desktop session with an available, unlocked
+Secret Service/keyring. Forwarding variables does not provision or unlock a
+keyring on headless machines. Do not enable plaintext token storage as a workaround.
+
+If an older manually configured `databasin` MCP server shadows the plugin,
+remove that obsolete registration before testing the plugin. Keep credentials
+in the OS store. Restart the host and use a new session after updating.
+
 Before enabling the plugin, verify the runtime and credential store:
 
 ```bash
@@ -39,7 +57,7 @@ product workflows.
 ## Release gates
 
 Do not merge or submit a release that references an unpublished client. Before
-version `0.9.0` is released:
+each plugin version is released:
 
 1. Publish `@databasin/mcp-client@0.2.0` under npm's `latest` tag.
 2. Deploy the true-MCP server to the production `/mcp` endpoint.
