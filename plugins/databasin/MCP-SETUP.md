@@ -3,7 +3,7 @@
 The plugin registers a local stdio MCP server through [`.mcp.json`](.mcp.json):
 
 ```text
-npx -y @databasin/mcp-client@0.2.0 --environment prod
+npx -y @databasin/mcp-client@0.2.1 --environment prod
 ```
 
 The local client connects to `https://databasin.cloud/mcp` with true Streamable
@@ -16,12 +16,17 @@ fallback.
 The client exposes two local tools:
 
 - `databasin_auth_status` checks local sign-in state.
-- `databasin_login` starts Microsoft Entra device sign-in and returns a
-  short-lived Microsoft URL and user code.
+- `databasin_login` starts DataBasin Auth0 device sign-in and returns the
+  approved activation URL and a short-lived user code.
 
-Enter credentials only on Microsoft's page. The client stores tokens in the
+Enter credentials only on the sign-in page or its selected identity provider. The client stores tokens in the
 OS-protected credential store and sends a bearer token only on remote
 `tools/call` requests. It does not place tokens in MCP output.
+
+Version 0.9.2 upgrades the client to Auth0. Sign in again after upgrading:
+legacy Microsoft sessions are not reused or deleted. Automatic renewal requires
+the Auth0 application's Refresh Token grant and the API's Allow Offline Access
+setting. If no refresh token is issued, sign in again when the access token expires.
 
 ## Local checks
 
@@ -46,7 +51,7 @@ in the OS store. Restart the host and use a new session after updating.
 Before enabling the plugin, verify the runtime and credential store:
 
 ```bash
-npx -y @databasin/mcp-client@0.2.0 doctor --environment prod
+npx -y @databasin/mcp-client@0.2.1 doctor --environment prod
 ```
 
 After installing the plugin, restart the host or reload plugins. Confirm that
@@ -59,7 +64,7 @@ product workflows.
 Do not merge or submit a release that references an unpublished client. Before
 each plugin version is released:
 
-1. Publish `@databasin/mcp-client@0.2.0` under npm's `latest` tag.
+1. Publish `@databasin/mcp-client@0.2.1` under npm's `latest` tag.
 2. Deploy the true-MCP server to the production `/mcp` endpoint.
 3. Verify production negotiation at protocol `2026-07-28` and compare the live
    `tools/list` names, descriptions, schemas, annotations, and timeout metadata

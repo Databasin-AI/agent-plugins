@@ -6,7 +6,7 @@ with a generic API client, arbitrary URL, local token file, or Databasin CLI.
 ## Start safely
 
 1. If a product call requires authentication, use `databasin_auth_status`, then
-   `databasin_login`. Enter credentials only on Microsoft's page.
+   `databasin_login`. Enter credentials only on the DataBasin sign-in page or its selected identity provider.
 2. Treat `tools/list` as the available protocol surface.
 3. Call `databasin_get_capabilities`, then `databasin_get_context`, and remain
    inside the returned projects and connectors.

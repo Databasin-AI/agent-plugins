@@ -1,6 +1,6 @@
 # Claude Code community submission checklist
 
-This is the release handoff for Databasin plugin `0.9.1`. The repository content
+This is the release handoff for Databasin plugin `0.9.2`. The repository content
 is prepared for Anthropic's `claude-community` marketplace, but the production
 dependency gates below must pass before the submission form is sent.
 
@@ -8,7 +8,7 @@ dependency gates below must pass before the submission form is sent.
 
 - Plugin name: `databasin`
 - Display name: `Databasin`
-- Version: `0.9.1`
+- Version: `0.9.2`
 - Publisher: Databasin Team (`info@databasin.co`)
 - Homepage: <https://www.databasin.ai>
 - Repository: <https://github.com/Databasin-AI/agent-plugins>
@@ -24,7 +24,7 @@ configuration and includes matching website and legal metadata.
 
 ## MCP contract
 
-The plugin pins `@databasin/mcp-client@0.2.0` and the production profile. The
+The plugin pins `@databasin/mcp-client@0.2.1` and the production profile. The
 client contributes `databasin_auth_status` and `databasin_login`, then discovers
 the remote product contract from production `tools/list`.
 
@@ -59,7 +59,7 @@ tests for any intentional rename or removal.
 
 Complete every item before submission:
 
-1. Publish `@databasin/mcp-client@0.2.0` to npm and confirm `latest` resolves to
+1. Publish `@databasin/mcp-client@0.2.1` to npm and confirm `latest` resolves to
    that exact version. Do not submit against the NP-only beta or a mutable
    unverified client version.
 2. Deploy the true-MCP implementation to `https://databasin.cloud/mcp` and
@@ -90,7 +90,7 @@ python3 /home/founder3/.codex/skills/.system/plugin-creator/scripts/validate_plu
 Then test the exact release commit from a clean Claude Code profile:
 
 1. Add the repository marketplace and install `databasin@databasin-tools`.
-2. Confirm the plugin picker shows `Databasin`, version `0.9.1`, the description,
+2. Confirm the plugin picker shows `Databasin`, version `0.9.2`, the description,
    publisher, and repository.
 3. Confirm the MCP server starts with no plugin errors.
 4. Run `databasin_auth_status`, complete `databasin_login`, then verify the two
