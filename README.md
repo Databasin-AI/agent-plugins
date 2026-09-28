@@ -23,8 +23,8 @@ codex plugin add databasin@databasin-tools
 
 The plugin starts the exact MCP client version declared in
 [`plugins/databasin/.mcp.json`](plugins/databasin/.mcp.json). The client uses
-Microsoft Entra device sign-in and keeps credentials in the operating system's
-protected credential store. Enter credentials only on Microsoft's page, never
+Auth0 device sign-in and keeps credentials in the operating system's
+protected credential store. Enter credentials only on the sign-in page, never
 in a chat or tool argument.
 
 ## Included workflows

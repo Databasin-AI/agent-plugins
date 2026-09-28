@@ -4,7 +4,7 @@
       "command": "npx",
       "args": [
         "-y",
-        "@databasin/mcp-client@0.2.0",
+        "@databasin/mcp-client@0.2.1",
         "--environment",
         "prod"
       ],

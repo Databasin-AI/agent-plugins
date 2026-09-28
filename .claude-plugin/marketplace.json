@@ -5,7 +5,7 @@
 		"name": "Databasin Tools",
 		"email": "info@databasin.co"
 	},
-	"version": "0.9.1",
+	"version": "0.9.2",
 	"plugins": [
 		{
 			"name": "databasin",
