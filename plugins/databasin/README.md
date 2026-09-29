@@ -10,7 +10,7 @@ data discovery, read-only analysis, metadata-agent runs, and support tickets.
   Service/libsecret keyring; the client does not fall back to plaintext storage.
 - A Databasin account authorized through the production Auth0 login.
 
-The plugin starts `@databasin/mcp-client@0.2.1` from [`.mcp.json`](.mcp.json).
+The plugin starts `@databasin/mcp-client@0.2.2` from [`.mcp.json`](.mcp.json).
 On first use, call `databasin_login` and follow the DataBasin Auth0 device sign-in
 instructions. Never provide credentials or tokens in chat.
 

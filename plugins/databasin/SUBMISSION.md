@@ -1,14 +1,14 @@
-# Claude Code community submission checklist
+# Public directory submission checklist
 
-This is the release handoff for Databasin plugin `0.9.2`. The repository content
-is prepared for Anthropic's `claude-community` marketplace, but the production
-dependency gates below must pass before the submission form is sent.
+This is the release handoff for Databasin plugin `0.9.3`. Installing from the
+Databasin GitHub marketplace is separate from acceptance into a public directory.
+Do not describe a prepared package or a registry entry as a Claude or OpenAI approval.
 
 ## Submission metadata
 
 - Plugin name: `databasin`
 - Display name: `Databasin`
-- Version: `0.9.2`
+- Version: `0.9.3`
 - Publisher: Databasin Team (`info@databasin.co`)
 - Homepage: <https://www.databasin.ai>
 - Repository: <https://github.com/Databasin-AI/agent-plugins>
@@ -24,7 +24,7 @@ configuration and includes matching website and legal metadata.
 
 ## MCP contract
 
-The plugin pins `@databasin/mcp-client@0.2.1` and the production profile. The
+The plugin pins `@databasin/mcp-client@0.2.2` and the production profile. The
 client contributes `databasin_auth_status` and `databasin_login`, then discovers
 the remote product contract from production `tools/list`.
 
@@ -59,7 +59,7 @@ tests for any intentional rename or removal.
 
 Complete every item before submission:
 
-1. Publish `@databasin/mcp-client@0.2.1` to npm and confirm `latest` resolves to
+1. Publish `@databasin/mcp-client@0.2.2` to npm and confirm `latest` resolves to
    that exact version. Do not submit against the NP-only beta or a mutable
    unverified client version.
 2. Deploy the true-MCP implementation to `https://databasin.cloud/mcp` and
@@ -90,7 +90,7 @@ python3 /home/founder3/.codex/skills/.system/plugin-creator/scripts/validate_plu
 Then test the exact release commit from a clean Claude Code profile:
 
 1. Add the repository marketplace and install `databasin@databasin-tools`.
-2. Confirm the plugin picker shows `Databasin`, version `0.9.2`, the description,
+2. Confirm the plugin picker shows `Databasin`, version `0.9.3`, the description,
    publisher, and repository.
 3. Confirm the MCP server starts with no plugin errors.
 4. Run `databasin_auth_status`, complete `databasin_login`, then verify the two
@@ -101,17 +101,43 @@ Then test the exact release commit from a clean Claude Code profile:
 
 ## Submit
 
-After the release commit is merged to `main`, submit the plugin source URL above
-through one of Anthropic's forms:
+### Claude Directory
 
-- Team or Enterprise directory administrators:
-  <https://claude.ai/admin-settings/directory/submissions/plugins/new>
-- Individual or Console publishers:
-  <https://platform.claude.com/plugins/submit>
+Use <https://claude.ai/directory/manage> from an eligible paid account. Connect a
+GitHub account with push access, select this repository and `plugins/databasin`,
+and validate the release source before completing the listing and review form.
+Complete required data-handling and legal attestations with the publisher.
+See <https://claude.com/docs/plugins/submit>.
 
-Anthropic reviews the plugin, pins an approved commit in the public community
-catalog, and syncs the catalog nightly. Do not submit the feature-branch URL or
-an unpublished dependency.
+The Claude Directory submission route is not a promise of placement in the
+separate `claude-plugins-official` marketplace. Do not promise a review date or
+catalog-sync schedule.
+
+### OpenAI / Codex public directory
+
+Use <https://platform.openai.com/plugins> in the verified Databasin publisher
+organization. The public MCP submission requires a remote HTTPS MCP service;
+the GitHub marketplace's local stdio client is not a substitute for that service.
+See <https://developers.openai.com/plugins/deploy/submission>.
+
+Before submission, verify protected-resource discovery and authorization-code
+sign-in with PKCE against the exact submitted URL. The resource identifier and
+issued token audience must agree. Preserve existing UI and local-client login;
+never relax token validation to make remote sign-in pass. Copy callback URLs
+and domain-verification challenges from the portal, not from examples.
+
+Provide a dedicated approved reviewer account and complete the behavior matrix,
+including non-staff restrictions. Do not submit a production user's credentials,
+claim an unverified test passed, or publish private verification evidence.
+
+### Official MCP Registry
+
+The client repository owns `server.json` and the registry-publication workflow:
+<https://github.com/Databasin-AI/mcp-client>. Publish the exact npm version first,
+then run `Publish MCP Registry` on `main` using GitHub OIDC. The namespace is
+`io.github.Databasin-AI/mcp-client`. Verify the resulting public registry record.
+This entry describes the local stdio package; it does not establish remote OAuth
+compatibility or approval by Claude or OpenAI.
 
 ## Release notes for 0.9.0
 

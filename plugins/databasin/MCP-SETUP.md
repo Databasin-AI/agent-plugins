@@ -3,7 +3,7 @@
 The plugin registers a local stdio MCP server through [`.mcp.json`](.mcp.json):
 
 ```text
-npx -y @databasin/mcp-client@0.2.1 --environment prod
+npx -y @databasin/mcp-client@0.2.2 --environment prod
 ```
 
 The local client connects to `https://databasin.cloud/mcp` with true Streamable
@@ -51,7 +51,7 @@ in the OS store. Restart the host and use a new session after updating.
 Before enabling the plugin, verify the runtime and credential store:
 
 ```bash
-npx -y @databasin/mcp-client@0.2.1 doctor --environment prod
+npx -y @databasin/mcp-client@0.2.2 doctor --environment prod
 ```
 
 After installing the plugin, restart the host or reload plugins. Confirm that
@@ -64,7 +64,7 @@ product workflows.
 Do not merge or submit a release that references an unpublished client. Before
 each plugin version is released:
 
-1. Publish `@databasin/mcp-client@0.2.1` under npm's `latest` tag.
+1. Publish `@databasin/mcp-client@0.2.2` under npm's `latest` tag.
 2. Deploy the true-MCP server to the production `/mcp` endpoint.
 3. Verify production negotiation at protocol `2026-07-28` and compare the live
    `tools/list` names, descriptions, schemas, annotations, and timeout metadata
