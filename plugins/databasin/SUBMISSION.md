@@ -1,6 +1,6 @@
 # Public directory submission checklist
 
-This is the release handoff for Databasin plugin `0.9.3`. Installing from the
+This is the release handoff for Databasin plugin `0.9.4`. Installing from the
 Databasin GitHub marketplace is separate from acceptance into a public directory.
 Do not describe a prepared package or a registry entry as a Claude or OpenAI approval.
 
@@ -8,7 +8,7 @@ Do not describe a prepared package or a registry entry as a Claude or OpenAI app
 
 - Plugin name: `databasin`
 - Display name: `Databasin`
-- Version: `0.9.3`
+- Version: `0.9.4`
 - Publisher: Databasin Team (`info@databasin.co`)
 - Homepage: <https://www.databasin.ai>
 - Repository: <https://github.com/Databasin-AI/agent-plugins>
@@ -19,12 +19,13 @@ Do not describe a prepared package or a registry entry as a Claude or OpenAI app
 - License: CC-BY-4.0
 
 The Claude manifest includes `displayName`, repository and publisher metadata,
-and a bundled `.mcp.json`. The Codex manifest points to the same MCP
-configuration and includes matching website and legal metadata.
+and a bundled `.mcp.json`. The Codex manifest points to `.mcp.codex.json` with
+the same pinned client and host-specific environment forwarding. Both include
+matching website and legal metadata.
 
 ## MCP contract
 
-The plugin pins `@databasin/mcp-client@0.2.2` and the production profile. The
+The plugin pins `@databasin/mcp-client@0.2.3` and the production profile. The
 client contributes `databasin_auth_status` and `databasin_login`, then discovers
 the remote product contract from production `tools/list`.
 
@@ -59,7 +60,7 @@ tests for any intentional rename or removal.
 
 Complete every item before submission:
 
-1. Publish `@databasin/mcp-client@0.2.2` to npm and confirm `latest` resolves to
+1. Publish `@databasin/mcp-client@0.2.3` to npm and confirm `latest` resolves to
    that exact version. Do not submit against the NP-only beta or a mutable
    unverified client version.
 2. Deploy the true-MCP implementation to `https://databasin.cloud/mcp` and
@@ -90,7 +91,7 @@ python3 /home/founder3/.codex/skills/.system/plugin-creator/scripts/validate_plu
 Then test the exact release commit from a clean Claude Code profile:
 
 1. Add the repository marketplace and install `databasin@databasin-tools`.
-2. Confirm the plugin picker shows `Databasin`, version `0.9.3`, the description,
+2. Confirm the plugin picker shows `Databasin`, version `0.9.4`, the description,
    publisher, and repository.
 3. Confirm the MCP server starts with no plugin errors.
 4. Run `databasin_auth_status`, complete `databasin_login`, then verify the two

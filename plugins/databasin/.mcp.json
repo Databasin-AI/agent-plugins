@@ -1,14 +1,12 @@
 {
   "mcpServers": {
     "databasin": {
-      "command": "npx",
+      "command": "node",
       "args": [
-        "-y",
-        "@databasin/mcp-client@0.2.2",
+        "${CLAUDE_PLUGIN_ROOT}/scripts/launch-mcp.mjs",
         "--environment",
         "prod"
-      ],
-      "env_vars": ["DBUS_SESSION_BUS_ADDRESS", "XDG_RUNTIME_DIR"]
+      ]
     }
   }
 }

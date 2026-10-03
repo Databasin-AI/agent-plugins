@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "databasin": {
+      "command": "node",
+      "args": ["./scripts/launch-mcp.mjs", "--environment", "prod"],
+      "cwd": ".",
+      "env_vars": [
+        "DBUS_SESSION_BUS_ADDRESS", "XDG_RUNTIME_DIR",
+        "DATABASIN_MCP_CREDENTIAL_STORE", "DATABASIN_MCP_STORE_KEY",
+        "DATABASIN_MCP_STORE_KEY_FILE", "DATABASIN_MCP_AUTH_DIR",
+        "DATABASIN_MCP_ACCESS_TOKEN", "DATABASIN_MCP_CLIENT_PATH"
+      ]
+    }
+  }
+}
