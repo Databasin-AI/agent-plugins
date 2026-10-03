@@ -20,8 +20,14 @@ from typing import Iterable
 
 ROOT = Path(__file__).resolve().parents[1]
 PLUGIN_ROOT = ROOT / "plugins" / "databasin"
-EXPECTED_PLUGIN_VERSION = "0.9.3"
-EXPECTED_MCP_PACKAGE = "@databasin/mcp-client@0.2.2"
+EXPECTED_PLUGIN_VERSION = "0.9.4"
+EXPECTED_MCP_PACKAGE = "@databasin/mcp-client@0.2.3"
+EXPECTED_CODEX_ENV = [
+    "DBUS_SESSION_BUS_ADDRESS", "XDG_RUNTIME_DIR",
+    "DATABASIN_MCP_CREDENTIAL_STORE", "DATABASIN_MCP_STORE_KEY",
+    "DATABASIN_MCP_STORE_KEY_FILE", "DATABASIN_MCP_AUTH_DIR",
+    "DATABASIN_MCP_ACCESS_TOKEN", "DATABASIN_MCP_CLIENT_PATH",
+]
 
 REMOTE_TOOL_NAMES = {
     "databasin_get_capabilities",
@@ -255,8 +261,8 @@ def validate_json_and_manifests(paths: list[Path], errors: list[str]) -> set[Pat
             errors.append("Claude and Codex plugin versions must match")
         if codex.get("repository") != plugin.get("repository"):
             errors.append("Claude and Codex plugin repositories must match")
-        if codex.get("mcpServers") != "./.mcp.json":
-            errors.append(f"{display(codex_manifest_path)}: mcpServers must reference './.mcp.json'")
+        if codex.get("mcpServers") != "./.mcp.codex.json":
+            errors.append(f"{display(codex_manifest_path)}: mcpServers must reference './.mcp.codex.json'")
         skills_path = resolve_declared_path(
             PLUGIN_ROOT,
             codex.get("skills"),
@@ -269,15 +275,23 @@ def validate_json_and_manifests(paths: list[Path], errors: list[str]) -> set[Pat
     mcp_path = PLUGIN_ROOT / ".mcp.json"
     mcp = parsed.get(mcp_path)
     expected_server = {
-        "command": "npx",
-        "args": ["-y", EXPECTED_MCP_PACKAGE, "--environment", "prod"],
-        "env_vars": ["DBUS_SESSION_BUS_ADDRESS", "XDG_RUNTIME_DIR"],
+        "command": "node",
+        "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/launch-mcp.mjs", "--environment", "prod"],
     }
     if not isinstance(mcp, dict) or mcp.get("mcpServers") != {"databasin": expected_server}:
         errors.append(
-            f"{display(mcp_path)}: must pin the production stdio client to {EXPECTED_MCP_PACKAGE} "
-            "and forward only DBUS_SESSION_BUS_ADDRESS and XDG_RUNTIME_DIR for secure Linux storage"
+            f"{display(mcp_path)}: must use the portable Node launcher without Codex-only fields"
         )
+    codex_mcp = parsed.get(PLUGIN_ROOT / ".mcp.codex.json")
+    expected_codex = {
+        "command": "node", "args": ["./scripts/launch-mcp.mjs", "--environment", "prod"],
+        "cwd": ".", "env_vars": EXPECTED_CODEX_ENV,
+    }
+    if not isinstance(codex_mcp, dict) or codex_mcp.get("mcpServers") != {"databasin": expected_codex}:
+        errors.append("Codex MCP must preserve secure Linux storage and explicit headless credential forwarding")
+    launcher = PLUGIN_ROOT / "scripts" / "launch-mcp.mjs"
+    if not launcher.is_file() or f"export const CLIENT_PACKAGE = '{EXPECTED_MCP_PACKAGE}';" not in launcher.read_text():
+        errors.append("Node launcher must pin the expected MCP package")
 
     if isinstance(marketplace, dict) and marketplace.get("version") != EXPECTED_PLUGIN_VERSION:
         errors.append(".claude-plugin/marketplace.json: version must match the plugin release")

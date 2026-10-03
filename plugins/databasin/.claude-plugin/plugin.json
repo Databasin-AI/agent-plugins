@@ -1,7 +1,7 @@
 {
 	"name": "databasin",
 	"displayName": "Databasin",
-	"version": "0.9.3",
+	"version": "0.9.4",
 	"description": "Connect Claude Code to Databasin for governed data discovery, schema exploration, read-only analysis, agent runs, and support tickets.",
 	"author": {
 		"name": "Databasin Team",

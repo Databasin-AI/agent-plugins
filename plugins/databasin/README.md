@@ -10,7 +10,10 @@ data discovery, read-only analysis, metadata-agent runs, and support tickets.
   Service/libsecret keyring; the client does not fall back to plaintext storage.
 - A Databasin account authorized through the production Auth0 login.
 
-The plugin starts `@databasin/mcp-client@0.2.2` from [`.mcp.json`](.mcp.json).
+The plugin starts pinned `@databasin/mcp-client@0.2.3` through a shared Node launcher.
+It supports npm, Bun, pnpm, or an exact preinstalled client. Claude uses
+[`.mcp.json`](.mcp.json); Codex uses [`.mcp.codex.json`](.mcp.codex.json).
+See [MCP setup](MCP-SETUP.md) for secure headless-container authentication.
 On first use, call `databasin_login` and follow the DataBasin Auth0 device sign-in
 instructions. Never provide credentials or tokens in chat.
 

@@ -1,6 +1,6 @@
 {
   "name": "databasin",
-  "version": "0.9.3",
+  "version": "0.9.4",
   "description": "Connect Codex to Databasin for governed data discovery, schema exploration, read-only analysis, agent runs, and support tickets.",
   "author": {
     "name": "Databasin Team",
@@ -18,7 +18,7 @@
     "data engineering"
   ],
   "skills": "./skills/",
-  "mcpServers": "./.mcp.json",
+  "mcpServers": "./.mcp.codex.json",
   "interface": {
     "displayName": "Databasin",
     "shortDescription": "Explore governed data",

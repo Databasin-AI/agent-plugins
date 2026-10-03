@@ -12,7 +12,7 @@ class ReleaseContractTests(unittest.TestCase):
 
         def load(path, errors):
             value = original(path, errors)
-            if path == validator.PLUGIN_ROOT / ".mcp.json":
+            if path == validator.PLUGIN_ROOT / ".mcp.codex.json":
                 server = value["mcpServers"]["databasin"]
                 if names is None:
                     server.pop("env_vars", None)
@@ -27,7 +27,7 @@ class ReleaseContractTests(unittest.TestCase):
 
     def test_shipped_release_contract(self):
         self.assertEqual(self.validate_with_env(
-            ["DBUS_SESSION_BUS_ADDRESS", "XDG_RUNTIME_DIR"]
+            validator.EXPECTED_CODEX_ENV
         ), [])
 
     def test_old_config_and_partial_forwarding_are_rejected(self):
