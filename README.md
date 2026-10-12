@@ -1,9 +1,12 @@
 # Databasin plugin
 
+V3 development follows the [canonical documentation index](https://dev.azure.com/TPIDAI/databasin/_git/databasin-meta?path=/.plans/V3-MIGRATION-INDEX.md&version=GBdocs/v3-unified-mcp) and its rules. This repository owns local commands and contracts; it does not define a competing migration architecture.
+
 The Databasin plugin connects Claude Code and Codex to Databasin through a
 bundled MCP client. It provides governed data discovery, schema exploration,
-bounded read-only SQL and assistant workflows, scoped metadata-agent runs, and
-support-ticket tools.
+bounded query and human assistant workflows, and support-ticket tools. The
+server advertises the capabilities available to the authenticated caller; the
+retired metadata-agent queue is not a supported workflow.
 
 ## Install
 
